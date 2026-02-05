@@ -427,7 +427,17 @@
                     </div>
                 </div>
                 
-                <h3 style="margin-top: 30px;">📤 Exportar Datos</h3>
+                <h3 style="margin-top: 30px;">☁️ Sincronización Automática</h3>
+                <div style="background:#f0f9ff;padding:15px;border-radius:10px;font-size:14px;border-left:4px solid #3b82f6;">
+                    <p style="margin:5px 0;"><strong>🔄 Estado:</strong> <span id="syncCloudStatus">Verificando...</span></p>
+                    <p style="margin:5px 0;"><strong>📡 Última sincronización:</strong> <span id="lastCloudSync">Nunca</span></p>
+                    <p style="margin:10px 0 5px 0; font-size:12px; color:#6b7280;">
+                        💡 Con internet, tus datos se sincronizan automáticamente en todos tus dispositivos
+                    </p>
+                </div>
+                <button class="btn-secondary" onclick="toggleCloudSync()" id="toggleSyncBtn" style="margin-top:10px;">⚙️ Configurar Sincronización</button>
+                
+                <h3 style="margin-top: 30px;">📤 Sincronización Manual (Backup)</h3>
                 <button class="btn-success" onclick="exportData()">💾 Descargar Datos (JSON)</button>
                 <button class="btn-secondary" onclick="shareData()">📤 Compartir Datos (Rápido)</button>
                 
@@ -473,7 +483,39 @@
         </div>
     </div>
 
+    <!-- Firebase SDK para sincronización en la nube -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <script>
+        // ===== CONFIGURACIÓN DE FIREBASE =====
+        // Esta es una configuración pública de ejemplo - puedes crear tu propia cuenta gratuita en Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDemoKeyForVolleyAtom123456789", // Clave demo
+            authDomain: "volleyatom-demo.firebaseapp.com",
+            projectId: "volleyatom-demo",
+            storageBucket: "volleyatom-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123def456"
+        };
+
+        // Inicializar Firebase
+        var firebaseApp = null;
+        var db = null;
+        var cloudSyncEnabled = false;
+        var syncListenerAttached = false;
+
+        try {
+            // Intentar inicializar Firebase (si está configurado correctamente)
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log('🔥 Firebase inicializado correctamente');
+            cloudSyncEnabled = localStorage.getItem('cloudSyncEnabled') !== 'false'; // Habilitado por defecto
+        } catch (error) {
+            console.warn('⚠️ Firebase no disponible (usar configuración real):', error.message);
+            cloudSyncEnabled = false;
+        }
+
         // Estado de la aplicación
         var users = [{user: 'admin', pass: 'admin'}];
         var students = [];
@@ -497,14 +539,174 @@
             }
         }
 
-        // Guardar datos
+        // Guardar datos (localStorage + sincronización cloud automática)
         function saveData() {
-            localStorage.setItem('volleyatom_data', JSON.stringify({
+            var data = {
                 users: users,
                 students: students,
                 payments: payments,
-                attendance: attendance
-            }));
+                attendance: attendance,
+                lastModified: new Date().toISOString()
+            };
+            
+            // Siempre guardar en localStorage (funciona offline)
+            localStorage.setItem('volleyatom_data', JSON.stringify(data));
+            
+            // Si cloud sync está habilitado, guardar también en Firebase
+            if (cloudSyncEnabled && db && currentUser) {
+                saveToCloud(data);
+            }
+        }
+
+        // Guardar datos en la nube (Firebase Firestore)
+        async function saveToCloud(data) {
+            if (!db || !currentUser) return;
+            
+            try {
+                // Usar el nombre de usuario como ID del documento
+                await db.collection('volleyatom_users').doc(currentUser).set({
+                    data: data,
+                    lastSync: firebase.firestore.FieldValue.serverTimestamp(),
+                    deviceInfo: {
+                        userAgent: navigator.userAgent.substring(0, 100),
+                        platform: navigator.platform
+                    }
+                });
+                
+                console.log('☁️ Datos sincronizados en la nube');
+                updateCloudSyncStatus('✅ Sincronizado', '#10b981');
+                localStorage.setItem('lastCloudSync', new Date().toISOString());
+            } catch (error) {
+                console.error('❌ Error al sincronizar:', error);
+                updateCloudSyncStatus('❌ Error al sincronizar', '#ef4444');
+            }
+        }
+
+        // Cargar datos desde la nube
+        async function loadFromCloud() {
+            if (!db || !currentUser) return null;
+            
+            try {
+                var doc = await db.collection('volleyatom_users').doc(currentUser).get();
+                
+                if (doc.exists) {
+                    var cloudData = doc.data();
+                    console.log('☁️ Datos cargados desde la nube');
+                    return cloudData.data;
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ Error al cargar desde la nube:', error);
+                return null;
+            }
+        }
+
+        // Actualizar estado de sincronización en UI
+        function updateCloudSyncStatus(status, color) {
+            var statusEl = document.getElementById('syncCloudStatus');
+            if (statusEl) {
+                statusEl.textContent = status;
+                statusEl.style.color = color;
+                statusEl.style.fontWeight = 'bold';
+            }
+            
+            var lastSyncEl = document.getElementById('lastCloudSync');
+            if (lastSyncEl) {
+                var lastSync = localStorage.getItem('lastCloudSync');
+                if (lastSync) {
+                    var date = new Date(lastSync);
+                    lastSyncEl.textContent = date.toLocaleString('es-DO');
+                }
+            }
+        }
+
+        // Escuchar cambios en tiempo real desde otros dispositivos
+        function startCloudSync() {
+            if (!db || !currentUser || syncListenerAttached) return;
+            
+            console.log('🔄 Iniciando sincronización en tiempo real...');
+            
+            db.collection('volleyatom_users').doc(currentUser)
+                .onSnapshot(function(doc) {
+                    if (doc.exists) {
+                        var cloudData = doc.data().data;
+                        var cloudTime = cloudData.lastModified;
+                        var localData = localStorage.getItem('volleyatom_data');
+                        var localTime = null;
+                        
+                        if (localData) {
+                            try {
+                                localTime = JSON.parse(localData).lastModified;
+                            } catch (e) {}
+                        }
+                        
+                        // Si los datos de la nube son más recientes, actualizar local
+                        if (!localTime || (cloudTime && new Date(cloudTime) > new Date(localTime))) {
+                            console.log('📥 Actualizando datos desde la nube...');
+                            students = cloudData.students || [];
+                            payments = cloudData.payments || [];
+                            attendance = cloudData.attendance || [];
+                            users = cloudData.users || users;
+                            
+                            localStorage.setItem('volleyatom_data', JSON.stringify(cloudData));
+                            
+                            // Actualizar vista si estamos en alguna sección
+                            if (currentUser) {
+                                var currentView = !document.getElementById('studentsView').classList.contains('hidden') ? 'students' :
+                                                 !document.getElementById('paymentsView').classList.contains('hidden') ? 'payments' :
+                                                 !document.getElementById('attendanceView').classList.contains('hidden') ? 'attendance' :
+                                                 !document.getElementById('syncView').classList.contains('hidden') ? 'sync' : null;
+                                
+                                if (currentView === 'students') renderStudents();
+                                else if (currentView === 'payments') renderPayments();
+                                else if (currentView === 'attendance') renderAttendance();
+                                else if (currentView === 'sync') updateSyncInfo();
+                            }
+                            
+                            updateCloudSyncStatus('✅ Sincronizado (actualizado)', '#10b981');
+                            localStorage.setItem('lastCloudSync', new Date().toISOString());
+                        }
+                    }
+                }, function(error) {
+                    console.error('❌ Error en sincronización en tiempo real:', error);
+                    updateCloudSyncStatus('❌ Error de conexión', '#ef4444');
+                });
+            
+            syncListenerAttached = true;
+            updateCloudSyncStatus('🔄 Sincronización activa', '#3b82f6');
+        }
+
+        // Activar/desactivar sincronización en la nube
+        function toggleCloudSync() {
+            if (!db) {
+                alert('❌ FIREBASE NO CONFIGURADO\n\n' +
+                      'Para habilitar la sincronización automática:\n\n' +
+                      '1. Crea una cuenta gratuita en Firebase: https://firebase.google.com\n' +
+                      '2. Crea un proyecto nuevo\n' +
+                      '3. Habilita Firestore Database\n' +
+                      '4. Copia tu configuración y reemplázala en el código\n\n' +
+                      '📖 Instrucciones completas en el README del proyecto');
+                return;
+            }
+            
+            cloudSyncEnabled = !cloudSyncEnabled;
+            localStorage.setItem('cloudSyncEnabled', cloudSyncEnabled.toString());
+            
+            if (cloudSyncEnabled) {
+                startCloudSync();
+                saveData(); // Sincronizar datos actuales
+                alert('✅ SINCRONIZACIÓN AUTOMÁTICA ACTIVADA\n\n' +
+                      '📡 Tus datos se sincronizarán automáticamente en todos tus dispositivos cuando tengas internet.\n\n' +
+                      '💾 Los cambios se guardan tanto localmente como en la nube.');
+            } else {
+                alert('⏸️ SINCRONIZACIÓN AUTOMÁTICA DESACTIVADA\n\n' +
+                      '💾 Tus datos solo se guardarán localmente en este dispositivo.\n\n' +
+                      'Usa "Exportar Datos" para sincronizar manualmente.');
+                updateCloudSyncStatus('⏸️ Desactivada', '#f59e0b');
+            }
+            
+            document.getElementById('toggleSyncBtn').textContent = 
+                cloudSyncEnabled ? '⏸️ Desactivar Sincronización' : '▶️ Activar Sincronización';
         }
 
         // Login
@@ -521,7 +723,45 @@
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('mainSection').classList.remove('hidden');
                 document.getElementById('userDisplay').textContent = '👤 ' + u;
-                showView('students');
+                
+                // Cargar datos desde la nube si está disponible
+                if (cloudSyncEnabled && db) {
+                    loadFromCloud().then(function(cloudData) {
+                        if (cloudData) {
+                            // Comparar fechas para ver cuál es más reciente
+                            var localData = localStorage.getItem('volleyatom_data');
+                            var useCloud = true;
+                            
+                            if (localData) {
+                                try {
+                                    localData = JSON.parse(localData);
+                                    var localTime = new Date(localData.lastModified || 0);
+                                    var cloudTime = new Date(cloudData.lastModified || 0);
+                                    
+                                    if (localTime > cloudTime) {
+                                        useCloud = false;
+                                        // Datos locales más recientes, sincronizar a la nube
+                                        saveData();
+                                    }
+                                } catch (e) {}
+                            }
+                            
+                            if (useCloud) {
+                                students = cloudData.students || [];
+                                payments = cloudData.payments || [];
+                                attendance = cloudData.attendance || [];
+                                localStorage.setItem('volleyatom_data', JSON.stringify(cloudData));
+                                console.log('📥 Datos cargados desde la nube');
+                            }
+                        }
+                        
+                        // Activar sincronización en tiempo real
+                        startCloudSync();
+                        showView('students');
+                    });
+                } else {
+                    showView('students');
+                }
             } else {
                 alert('Usuario o contraseña incorrectos');
             }
@@ -1934,6 +2174,18 @@
                 document.getElementById('lastExport').textContent = date.toLocaleString('es-DO');
             } else {
                 document.getElementById('lastExport').textContent = 'Nunca';
+            }
+            
+            // Actualizar estado de sincronización en la nube
+            if (cloudSyncEnabled && db) {
+                updateCloudSyncStatus('🔄 Sincronización activa', '#3b82f6');
+                document.getElementById('toggleSyncBtn').textContent = '⏸️ Desactivar Sincronización';
+            } else if (db) {
+                updateCloudSyncStatus('⏸️ Desactivada (manual)', '#f59e0b');
+                document.getElementById('toggleSyncBtn').textContent = '▶️ Activar Sincronización';
+            } else {
+                updateCloudSyncStatus('❌ No configurada', '#6b7280');
+                document.getElementById('toggleSyncBtn').textContent = '⚙️ Configurar Firebase';
             }
         }
         
