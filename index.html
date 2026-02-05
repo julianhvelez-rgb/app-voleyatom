@@ -436,10 +436,11 @@
                 <button class="btn-success" onclick="document.getElementById('importFile').click()">📂 Cargar Archivo JSON</button>
                 
                 <!-- Botón de prueba del portapapeles -->
-                <h3 style="margin-top: 30px;">🧪 Probar Portapapeles</h3>
-                <button class="btn-secondary" onclick="testClipboard()">📋 Probar Copiar al Portapapeles</button>
+                <h3 style="margin-top: 30px;">🧪 Diagnóstico del Portapapeles</h3>
+                <button class="btn-secondary" onclick="testClipboard()">📋 Probar Copiar</button>
+                <button class="btn-secondary" onclick="diagnoseClipboard()">🔍 Diagnóstico Completo</button>
                 <p style="font-size: 13px; color: #6b7280; margin-top: 8px;">
-                    Prueba si tu navegador soporta copiar al portapapeles correctamente
+                    Chrome + HTTPS = ✅ Portapapeles debería funcionar perfectamente
                 </p>
                 
                 <div id="syncStatus" style="margin-top: 20px;"></div>
@@ -2181,6 +2182,170 @@
             setTimeout(function() {
                 document.getElementById('syncStatus').innerHTML = '';
             }, 12000);
+        }
+        
+        // Función de diagnóstico completo del portapapeles
+        async function diagnoseClipboard() {
+            var report = [];
+            report.push('🔍 DIAGNÓSTICO COMPLETO DEL PORTAPAPELES\n');
+            report.push('📅 ' + new Date().toLocaleString('es-DO') + '\n\n');
+            
+            // 1. Información del navegador
+            report.push('🌐 NAVEGADOR:');
+            report.push('User Agent: ' + navigator.userAgent);
+            report.push('Plataforma: ' + navigator.platform);
+            report.push('Idioma: ' + navigator.language);
+            report.push('URL: ' + window.location.href);
+            report.push('Protocolo: ' + window.location.protocol);
+            report.push('\n');
+            
+            // 2. Verificar disponibilidad de APIs
+            report.push('🔧 APIS DISPONIBLES:');
+            report.push('✓ navigator.clipboard: ' + (navigator.clipboard ? 'SÍ ✅' : 'NO ❌'));
+            report.push('✓ navigator.clipboard.writeText: ' + (navigator.clipboard && navigator.clipboard.writeText ? 'SÍ ✅' : 'NO ❌'));
+            report.push('✓ navigator.clipboard.readText: ' + (navigator.clipboard && navigator.clipboard.readText ? 'SÍ ✅' : 'NO ❌'));
+            report.push('✓ document.execCommand: ' + (document.execCommand ? 'SÍ ✅' : 'NO ❌'));
+            report.push('\n');
+            
+            // 3. Verificar contexto seguro
+            report.push('🔒 CONTEXTO SEGURO:');
+            report.push('isSecureContext: ' + (window.isSecureContext ? 'SÍ ✅' : 'NO ❌'));
+            report.push('HTTPS: ' + (window.location.protocol === 'https:' ? 'SÍ ✅' : 'NO ❌'));
+            report.push('\n');
+            
+            // 4. Verificar permisos
+            report.push('🔑 PERMISOS:');
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    try {
+                        var clipboardWritePermission = await navigator.permissions.query({name: 'clipboard-write'});
+                        report.push('clipboard-write: ' + clipboardWritePermission.state + ' ' + 
+                            (clipboardWritePermission.state === 'granted' ? '✅' : 
+                             clipboardWritePermission.state === 'prompt' ? '⚠️' : '❌'));
+                    } catch (e) {
+                        report.push('clipboard-write: No disponible o no requerido');
+                    }
+                    
+                    try {
+                        var clipboardReadPermission = await navigator.permissions.query({name: 'clipboard-read'});
+                        report.push('clipboard-read: ' + clipboardReadPermission.state + ' ' + 
+                            (clipboardReadPermission.state === 'granted' ? '✅' : 
+                             clipboardReadPermission.state === 'prompt' ? '⚠️' : '❌'));
+                    } catch (e) {
+                        report.push('clipboard-read: No disponible');
+                    }
+                } else {
+                    report.push('API de permisos no disponible');
+                }
+            } catch (e) {
+                report.push('Error al verificar permisos: ' + e.message);
+            }
+            report.push('\n');
+            
+            // 5. PRUEBA REAL - Copiar con API moderna
+            report.push('🧪 PRUEBA 1 - CLIPBOARD API:');
+            var testText1 = 'Test Clipboard API - ' + Date.now();
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(testText1);
+                    report.push('✅ ÉXITO - Copiado con Clipboard API');
+                    
+                    // Intentar leer para confirmar
+                    try {
+                        var readBack = await navigator.clipboard.readText();
+                        if (readBack === testText1) {
+                            report.push('✅ VERIFICADO - Texto confirmado en portapapeles');
+                        } else {
+                            report.push('⚠️ ADVERTENCIA - Texto leído no coincide');
+                        }
+                    } catch (e) {
+                        report.push('⚠️ No se pudo leer (permiso denegado, pero copia pudo funcionar)');
+                    }
+                } else {
+                    report.push('❌ API no disponible');
+                }
+            } catch (e) {
+                report.push('❌ ERROR: ' + e.name + ' - ' + e.message);
+            }
+            report.push('\n');
+            
+            // 6. PRUEBA REAL - execCommand
+            report.push('🧪 PRUEBA 2 - EXECCOMMAND:');
+            var testText2 = 'Test execCommand - ' + Date.now();
+            try {
+                var textarea = document.createElement('textarea');
+                textarea.value = testText2;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.width = '1px';
+                textarea.style.height = '1px';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                var successful = document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                if (successful) {
+                    report.push('✅ ÉXITO - execCommand retornó true');
+                } else {
+                    report.push('❌ FALLO - execCommand retornó false');
+                }
+            } catch (e) {
+                report.push('❌ ERROR: ' + e.message);
+            }
+            report.push('\n');
+            
+            // 7. Recomendaciones
+            report.push('💡 RECOMENDACIONES:');
+            if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+                report.push('✅ Tu configuración es PERFECTA');
+                report.push('✅ El portapapeles DEBERÍA funcionar sin problemas');
+                report.push('');
+                report.push('🔍 Si aún no funciona:');
+                report.push('1. Abre la Consola (F12) → pestaña Console');
+                report.push('2. Busca mensajes de error en rojo');
+                report.push('3. Verifica el icono del candado (🔒) en la barra de direcciones');
+                report.push('4. Click en el candado → Permisos del sitio → Portapapeles');
+            } else {
+                report.push('⚠️ Hay problemas con tu configuración');
+                if (!window.isSecureContext) {
+                    report.push('❌ No estás en contexto seguro (HTTPS)');
+                }
+                if (!navigator.clipboard) {
+                    report.push('❌ Tu navegador no soporta Clipboard API');
+                    report.push('   → Actualiza Chrome a la versión más reciente');
+                }
+            }
+            
+            var fullReport = report.join('\n');
+            console.log('\n' + fullReport + '\n');
+            
+            // Mostrar en pantalla
+            document.getElementById('syncStatus').innerHTML = 
+                '<div class="info" style="background:#f0f9ff;border-left-color:#3b82f6;max-height:400px;overflow-y:auto;">' +
+                '<h4 style="margin:0 0 10px 0;color:#1e40af;">📋 Reporte de Diagnóstico</h4>' +
+                '<pre style="font-size:11px;line-height:1.6;white-space:pre-wrap;margin:0;">' + 
+                fullReport +
+                '</pre>' +
+                '<br><strong>💡 Este reporte también está en la Consola (F12)</strong>' +
+                '</div>';
+            
+            // Copiar el reporte al portapapeles
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(fullReport);
+                    alert('✅ Reporte de diagnóstico copiado al portapapeles\n\n📋 Puedes pegarlo con Ctrl+V\n\n🔍 También está visible en pantalla y en la Consola (F12)');
+                }
+            } catch (e) {
+                console.log('No se pudo copiar el reporte automáticamente');
+            }
+            
+            setTimeout(function() {
+                document.getElementById('syncStatus').innerHTML = '';
+            }, 30000); // 30 segundos para leer
         }
         
         // Importar datos desde archivo JSON
