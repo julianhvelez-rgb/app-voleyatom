@@ -410,14 +410,37 @@
                 <div class="info">
                     📱 Sincroniza tus datos entre teléfonos y computadora. <strong>Exporta</strong> los datos, compártelos y luego <strong>importa</strong> en el otro dispositivo.
                 </div>
+
+                <!-- Instrucciones paso a paso -->
+                <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #667eea;">
+                    <h4 style="color: #3730a3; margin: 0 0 15px 0;">📖 ¿Cómo sincronizar?</h4>
+                    <div style="font-size: 14px; line-height: 1.8;">
+                        <p style="margin: 10px 0;"><strong>🖥️ Desde Web → 📱 Teléfono:</strong></p>
+                        <p style="margin: 5px 0 5px 20px;">1. Click en "💾 Descargar Datos"</p>
+                        <p style="margin: 5px 0 5px 20px;">2. Envía el archivo al teléfono (WhatsApp/Email)</p>
+                        <p style="margin: 5px 0 5px 20px;">3. En el teléfono: "📂 Cargar Archivo"</p>
+                        
+                        <p style="margin: 15px 0 5px 0;"><strong>📤 Método rápido:</strong></p>
+                        <p style="margin: 5px 0 5px 20px;">• Click "📤 Compartir Datos"</p>
+                        <p style="margin: 5px 0 5px 20px;">• Elige app para compartir</p>
+                        <p style="margin: 5px 0 5px 20px;">• Importa en el otro dispositivo</p>
+                    </div>
+                </div>
                 
                 <h3 style="margin-top: 30px;">📤 Exportar Datos</h3>
                 <button class="btn-success" onclick="exportData()">💾 Descargar Datos (JSON)</button>
-                <button class="btn-secondary" onclick="shareData()">📤 Compartir Datos</button>
+                <button class="btn-secondary" onclick="shareData()">📤 Compartir Datos (Rápido)</button>
                 
                 <h3 style="margin-top: 30px;">📥 Importar Datos</h3>
                 <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData()">
                 <button class="btn-success" onclick="document.getElementById('importFile').click()">📂 Cargar Archivo JSON</button>
+                
+                <!-- Botón de prueba del portapapeles -->
+                <h3 style="margin-top: 30px;">🧪 Probar Portapapeles</h3>
+                <button class="btn-secondary" onclick="testClipboard()">📋 Probar Copiar al Portapapeles</button>
+                <p style="font-size: 13px; color: #6b7280; margin-top: 8px;">
+                    Prueba si tu navegador soporta copiar al portapapeles correctamente
+                </p>
                 
                 <div id="syncStatus" style="margin-top: 20px;"></div>
                 
@@ -1501,21 +1524,53 @@
             return new Uint8Array(commands);
         }
 
-        // Copiar recibo al portapapeles
-        function copyReceiptToClipboard() {
+        // Copiar recibo al portapapeles (Clipboard API moderna)
+        async function copyReceiptToClipboard() {
+            try {
+                // Intentar con la API moderna del Clipboard
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(currentReceipt.text);
+                    alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
+                    closePrintModal();
+                } else {
+                    // Fallback para navegadores antiguos
+                    copyToClipboardFallback(currentReceipt.text, function() {
+                        alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
+                        closePrintModal();
+                    });
+                }
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                // Intentar método fallback
+                copyToClipboardFallback(currentReceipt.text, function() {
+                    alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
+                    closePrintModal();
+                });
+            }
+        }
+
+        // Función auxiliar para copiar al portapapeles (método antiguo como fallback)
+        function copyToClipboardFallback(text, successCallback) {
             var textarea = document.createElement('textarea');
-            textarea.value = currentReceipt.text;
+            textarea.value = text;
             textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
             textarea.style.opacity = '0';
             document.body.appendChild(textarea);
+            textarea.focus();
             textarea.select();
             
             try {
-                document.execCommand('copy');
-                alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
-                closePrintModal();
+                var successful = document.execCommand('copy');
+                if (successful && successCallback) {
+                    successCallback();
+                } else if (!successful) {
+                    alert('❌ No se pudo copiar automáticamente\n\n⚠️ Tu navegador no soporta copiar al portapapeles.\n\nUsá Chrome, Edge o Firefox actualizado.');
+                }
             } catch (err) {
-                alert('❌ No se pudo copiar automáticamente');
+                console.error('Error al copiar:', err);
+                alert('❌ Error al copiar al portapapeles\n\n' + err.message);
             }
             
             document.body.removeChild(textarea);
@@ -1901,27 +1956,95 @@
             }
         }
         
-        // Copiar datos al portapapeles como respaldo
-        function fallbackCopyData(dataStr) {
-            var textarea = document.createElement('textarea');
-            textarea.value = dataStr;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
+        // Copiar datos al portapapeles como respaldo (Clipboard API moderna)
+        async function fallbackCopyData(dataStr) {
             try {
-                document.execCommand('copy');
-                document.getElementById('syncStatus').innerHTML = '<div class="info">📋 Datos copiados al portapapeles. Pégalos en un archivo .json y compártelo.</div>';
+                // Intentar con la API moderna del Clipboard
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(dataStr);
+                    document.getElementById('syncStatus').innerHTML = '<div class="info">✅ Datos copiados al portapapeles. Pégalos en un archivo .json y compártelo.</div>';
+                } else {
+                    // Fallback para navegadores antiguos
+                    copyToClipboardFallback(dataStr, function() {
+                        document.getElementById('syncStatus').innerHTML = '<div class="info">✅ Datos copiados al portapapeles. Pégalos en un archivo .json y compártelo.</div>';
+                    });
+                }
             } catch (err) {
-                document.getElementById('syncStatus').innerHTML = '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">⚠️ Usa el botón "Descargar Datos" en su lugar.</div>';
+                console.error('Error al copiar:', err);
+                // Intentar método fallback
+                var textarea = document.createElement('textarea');
+                textarea.value = dataStr;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                try {
+                    var successful = document.execCommand('copy');
+                    if (successful) {
+                        document.getElementById('syncStatus').innerHTML = '<div class="info">✅ Datos copiados al portapapeles. Pégalos en un archivo .json y compártelo.</div>';
+                    } else {
+                        document.getElementById('syncStatus').innerHTML = '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">⚠️ Usa el botón "Descargar Datos" en su lugar.</div>';
+                    }
+                } catch (e) {
+                    document.getElementById('syncStatus').innerHTML = '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">⚠️ Usa el botón "Descargar Datos" en su lugar.</div>';
+                }
+                
+                document.body.removeChild(textarea);
             }
-            
-            document.body.removeChild(textarea);
             
             setTimeout(function() {
                 document.getElementById('syncStatus').innerHTML = '';
             }, 5000);
+        }
+        
+        // Función de prueba del portapapeles
+        async function testClipboard() {
+            var testText = '✅ ¡Portapapeles funcionando! - VolleyAtom ' + new Date().toLocaleString('es-DO');
+            
+            try {
+                // Intentar con la API moderna del Clipboard
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(testText);
+                    document.getElementById('syncStatus').innerHTML = 
+                        '<div class="info" style="background:#d1fae5;border-left-color:#10b981;">' +
+                        '✅ <strong>Portapapeles ACTIVO</strong><br><br>' +
+                        '🎉 Tu navegador soporta la Clipboard API moderna<br>' +
+                        '📋 Texto copiado: "' + testText + '"<br><br>' +
+                        '💡 Presiona <strong>Ctrl+V</strong> (o Cmd+V en Mac) para pegar' +
+                        '</div>';
+                } else {
+                    // Intentar con el método fallback
+                    copyToClipboardFallback(testText, function() {
+                        document.getElementById('syncStatus').innerHTML = 
+                            '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">' +
+                            '⚠️ <strong>Portapapeles ACTIVO (Método antiguo)</strong><br><br>' +
+                            '📋 Tu navegador usa el método antiguo pero funciona<br>' +
+                            '💡 Presiona <strong>Ctrl+V</strong> para pegar<br><br>' +
+                            '🔄 Considera actualizar a Chrome, Edge o Firefox moderno' +
+                            '</div>';
+                    });
+                }
+            } catch (err) {
+                console.error('Error en portapapeles:', err);
+                document.getElementById('syncStatus').innerHTML = 
+                    '<div class="info" style="background:#fecaca;border-left-color:#ef4444;">' +
+                    '❌ <strong>Error en portapapeles</strong><br><br>' +
+                    'Error: ' + err.message + '<br><br>' +
+                    '🔧 <strong>Soluciones:</strong><br>' +
+                    '1. Usa Chrome, Edge o Firefox actualizado<br>' +
+                    '2. Asegúrate de estar en HTTPS o localhost<br>' +
+                    '3. Verifica permisos del navegador<br>' +
+                    '4. Usa "💾 Descargar Datos" como alternativa' +
+                    '</div>';
+            }
+            
+            setTimeout(function() {
+                document.getElementById('syncStatus').innerHTML = '';
+            }, 8000);
         }
         
         // Importar datos desde archivo JSON
