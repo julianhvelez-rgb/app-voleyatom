@@ -1,8 +1,8 @@
 // Service Worker para VolleyAtom
-const CACHE_NAME = 'volleyatom-v2';
+const CACHE_NAME = 'volleyatom-v3';
 const urlsToCache = [
   './',
-  './volleyatom-nuevo.html',
+  './index.html',
   './manifest.json'
 ];
 
