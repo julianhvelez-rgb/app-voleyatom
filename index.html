@@ -637,19 +637,40 @@
                 html += '<span style="color: ' + attendanceColor + '; font-weight: bold;">📊 Asistencia: ' + attendancePercent + '%</span> (' + presentDays + '/' + studentAttendance.length + ' días)';
                 info.innerHTML = html;
                 
+                // Contenedor de botones
+                var buttonsContainer = document.createElement('div');
+                buttonsContainer.style.display = 'flex';
+                buttonsContainer.style.gap = '10px';
+                buttonsContainer.style.marginTop = '10px';
+                buttonsContainer.style.flexWrap = 'wrap';
+                
+                // Botón de editar
+                var editBtn = document.createElement('button');
+                editBtn.className = 'btn-secondary';
+                editBtn.style.width = 'auto';
+                editBtn.style.padding = '8px 16px';
+                editBtn.style.flex = '1';
+                editBtn.innerHTML = '✏️ Editar';
+                editBtn.onclick = function() {
+                    openEditModal(s.id);
+                };
+                
                 // Botón de eliminar
                 var deleteBtn = document.createElement('button');
                 deleteBtn.className = 'btn-danger';
-                deleteBtn.style.marginTop = '10px';
                 deleteBtn.style.width = 'auto';
                 deleteBtn.style.padding = '8px 16px';
+                deleteBtn.style.flex = '1';
                 deleteBtn.innerHTML = '🗑️ Eliminar';
                 deleteBtn.onclick = function() {
                     deleteStudent(s.id);
                 };
                 
+                buttonsContainer.appendChild(editBtn);
+                buttonsContainer.appendChild(deleteBtn);
+                
                 div.appendChild(info);
-                div.appendChild(deleteBtn);
+                div.appendChild(buttonsContainer);
                 list.appendChild(div);
             });
             updateStudentSelect();
@@ -674,6 +695,67 @@
                 renderStudents();
                 alert('✅ Estudiante eliminado');
             }
+        }
+
+        // Abrir modal de edición
+        function openEditModal(studentId) {
+            var student = students.find(function(s) { return s.id === studentId; });
+            if (!student) return;
+            
+            // Llenar el formulario con los datos actuales
+            document.getElementById('editStudentId').value = student.id;
+            document.getElementById('editName').value = student.name || '';
+            document.getElementById('editAge').value = student.age || '';
+            document.getElementById('editParentName').value = student.parentName || '';
+            document.getElementById('editContact').value = student.contact || '';
+            document.getElementById('editParentContact').value = student.parentContact || '';
+            document.getElementById('editSchedule').value = student.schedule || '';
+            
+            // Mostrar modal
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        // Cerrar modal de edición
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        // Guardar cambios del estudiante editado
+        function saveEditStudent() {
+            var studentId = parseInt(document.getElementById('editStudentId').value);
+            var name = document.getElementById('editName').value;
+            var age = document.getElementById('editAge').value;
+            var parentName = document.getElementById('editParentName').value;
+            var contact = document.getElementById('editContact').value;
+            var parentContact = document.getElementById('editParentContact').value;
+            var schedule = document.getElementById('editSchedule').value;
+
+            if (!name) {
+                alert('El nombre del estudiante es obligatorio');
+                return;
+            }
+
+            // Buscar estudiante y actualizar
+            var studentIndex = students.findIndex(function(s) { return s.id === studentId; });
+            if (studentIndex === -1) {
+                alert('❌ Error: Estudiante no encontrado');
+                return;
+            }
+
+            students[studentIndex] = {
+                id: studentId,
+                name: name,
+                age: age,
+                parentName: parentName,
+                contact: contact,
+                parentContact: parentContact,
+                schedule: schedule
+            };
+
+            saveData();
+            renderStudents();
+            closeEditModal();
+            alert('✅ Estudiante actualizado correctamente');
         }
 
         // Actualizar select de estudiantes
@@ -1989,5 +2071,27 @@
         
         console.log('VolleyAtom cargado');
     </script>
+
+    <!-- Modal de Edición de Estudiante -->
+    <div id="editModal" class="modal" onclick="if(event.target === this) closeEditModal();">
+        <div class="modal-content">
+            <h2 style="text-align: center; margin-bottom: 20px;">✏️ Editar Estudiante</h2>
+            <input type="hidden" id="editStudentId">
+            <input type="text" id="editName" placeholder="Nombre completo del estudiante">
+            <input type="date" id="editAge" placeholder="Fecha de nacimiento">
+            <input type="text" id="editParentName" placeholder="Nombre del padre/madre/tutor">
+            <input type="text" id="editContact" placeholder="Teléfono principal">
+            <input type="text" id="editParentContact" placeholder="Teléfono del padre/madre">
+            <select id="editSchedule">
+                <option value="">Seleccionar Horario</option>
+                <option value="Sábado 2:00 PM - 4:00 PM">🕑 Sábado 2:00 PM - 4:00 PM</option>
+                <option value="Sábado 4:00 PM - 6:00 PM">🕓 Sábado 4:00 PM - 6:00 PM</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="btn-success" onclick="saveEditStudent()">💾 Guardar Cambios</button>
+                <button class="btn-danger" onclick="closeEditModal()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
