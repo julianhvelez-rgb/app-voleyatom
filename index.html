@@ -385,7 +385,7 @@
                     <option value="Sábado 4:00 PM - 6:00 PM">🕓 Sábado 4:00 PM - 6:00 PM</option>
                 </select>
                 <button class="btn-success" onclick="addStudent()">➕ Agregar Estudiante</button>
-                <h3 style="margin-top: 30px;">📋 Lista de Estudiantes</h3>
+                <h3 style="margin-top: 30px;">📋 Lista de Estudiantes <span id="studentCount" style="background:#10b981;color:white;padding:4px 12px;border-radius:20px;font-size:16px;margin-left:10px;">0</span></h3>
                 <input type="text" id="searchStudent" placeholder="🔍 Buscar estudiante por nombre..." 
                        oninput="filterStudents()" 
                        style="margin-bottom: 15px; background: #f7fafc;">
@@ -397,17 +397,32 @@
                 <select id="pStudent">
                     <option value="">Seleccionar estudiante</option>
                 </select>
-                <select id="pType">
+                <select id="pType" onchange="toggleMonthSelector()">
                     <option value="inscripcion">Inscripción - RD$ 1,000.00</option>
                     <option value="mensualidad">Mensualidad - RD$ 1,000.00</option>
                     <option value="camiseta">Camiseta - RD$ 500.00</option>
+                </select>
+                <select id="pMonth" style="display:none;">
+                    <option value="">Seleccionar mes</option>
+                    <option value="Enero">Enero</option>
+                    <option value="Febrero">Febrero</option>
+                    <option value="Marzo">Marzo</option>
+                    <option value="Abril">Abril</option>
+                    <option value="Mayo">Mayo</option>
+                    <option value="Junio">Junio</option>
+                    <option value="Julio">Julio</option>
+                    <option value="Agosto">Agosto</option>
+                    <option value="Septiembre">Septiembre</option>
+                    <option value="Octubre">Octubre</option>
+                    <option value="Noviembre">Noviembre</option>
+                    <option value="Diciembre">Diciembre</option>
                 </select>
                 <select id="pMethod">
                     <option value="efectivo">💵 Efectivo</option>
                     <option value="transferencia">🏦 Transferencia</option>
                 </select>
                 <button class="btn-success" onclick="addPayment()">✅ Registrar Pago</button>
-                <h3 style="margin-top: 30px;">💰 Últimos Pagos</h3>
+                <h3 style="margin-top: 30px;">💰 Últimos Pagos <span id="paymentCount" style="background:#3b82f6;color:white;padding:4px 12px;border-radius:20px;font-size:16px;margin-left:10px;">0</span></h3>
                 <input type="text" id="searchPayment" placeholder="🔍 Buscar pago por estudiante..." 
                        oninput="filterPayments()" 
                        style="margin-bottom: 15px; background: #f7fafc;">
@@ -438,38 +453,19 @@
             <div id="syncView" class="hidden">
                 <h3>🔄 Sincronización de Datos</h3>
                 <div class="info">
-                    📱 Sincroniza tus datos entre teléfonos y computadora. <strong>Exporta</strong> los datos, compártelos y luego <strong>importa</strong> en el otro dispositivo.
-                </div>
-
-                <!-- Instrucciones paso a paso -->
-                <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #667eea;">
-                    <h4 style="color: #3730a3; margin: 0 0 15px 0;">📖 ¿Cómo sincronizar?</h4>
-                    <div style="font-size: 14px; line-height: 1.8;">
-                        <p style="margin: 10px 0;"><strong>🖥️ Desde Web → 📱 Teléfono:</strong></p>
-                        <p style="margin: 5px 0 5px 20px;">1. Click en "💾 Descargar Datos"</p>
-                        <p style="margin: 5px 0 5px 20px;">2. Envía el archivo al teléfono (WhatsApp/Email)</p>
-                        <p style="margin: 5px 0 5px 20px;">3. En el teléfono: "📂 Cargar Archivo"</p>
-                        
-                        <p style="margin: 15px 0 5px 0;"><strong>📤 Método rápido:</strong></p>
-                        <p style="margin: 5px 0 5px 20px;">• Click "📤 Compartir Datos"</p>
-                        <p style="margin: 5px 0 5px 20px;">• Elige app para compartir</p>
-                        <p style="margin: 5px 0 5px 20px;">• Importa en el otro dispositivo</p>
-                    </div>
+                    � Usa el botón verde en la esquina inferior izquierda para activar/desactivar la sincronización automática.
                 </div>
                 
                 <h3 style="margin-top: 30px;">☁️ Sincronización Automática</h3>
                 <div style="background:#f0f9ff;padding:15px;border-radius:10px;font-size:14px;border-left:4px solid #3b82f6;">
                     <p style="margin:5px 0;"><strong>🔄 Estado:</strong> <span id="syncCloudStatus">Verificando...</span></p>
                     <p style="margin:5px 0;"><strong>📡 Última sincronización:</strong> <span id="lastCloudSync">Nunca</span></p>
-                    <p style="margin:10px 0 5px 0; font-size:12px; color:#6b7280;">
-                        💡 Con internet, tus datos se sincronizan automáticamente en todos tus dispositivos
-                    </p>
                 </div>
                 <button class="btn-secondary" onclick="toggleCloudSync()" id="toggleSyncBtn" style="margin-top:10px;">⚙️ Configurar Sincronización</button>
                 
-                <h3 style="margin-top: 30px;">📤 Sincronización Manual (Backup)</h3>
-                <button class="btn-success" onclick="exportData()">💾 Descargar Datos (JSON)</button>
-                <button class="btn-secondary" onclick="shareData()">📤 Compartir Datos (Rápido)</button>
+                <h3 style="margin-top: 30px;">📤 Backup Manual</h3>
+                <button class="btn-success" onclick="exportData()">💾 Descargar Datos</button>
+                <button class="btn-secondary" onclick="shareData()">📤 Compartir Datos</button>
                 
                 <h3 style="margin-top: 30px;">📥 Importar Datos</h3>
                 <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData()">
@@ -887,6 +883,10 @@
             var list = document.getElementById('studentsList');
             var searchTerm = document.getElementById('searchStudent') ? document.getElementById('searchStudent').value.toLowerCase() : '';
             list.innerHTML = '';
+            
+            // Actualizar contador
+            var countEl = document.getElementById('studentCount');
+            if (countEl) countEl.textContent = students.length;
 
             if (students.length === 0) {
                 list.innerHTML = '<div class="empty-state">No hay estudiantes registrados</div>';
@@ -1082,13 +1082,29 @@
         }
 
         // Agregar pago
+        function toggleMonthSelector() {
+            var type = document.getElementById('pType').value;
+            var monthSelect = document.getElementById('pMonth');
+            if (type === 'mensualidad') {
+                monthSelect.style.display = 'block';
+            } else {
+                monthSelect.style.display = 'none';
+            }
+        }
+        
         function addPayment() {
             var studentId = document.getElementById('pStudent').value;
             var type = document.getElementById('pType').value;
             var method = document.getElementById('pMethod').value;
+            var month = document.getElementById('pMonth').value;
 
             if (!studentId) {
                 alert('Selecciona un estudiante');
+                return;
+            }
+            
+            if (type === 'mensualidad' && !month) {
+                alert('Selecciona el mes de pago');
                 return;
             }
 
@@ -1104,11 +1120,17 @@
                 type: type,
                 method: method,
                 amount: amounts[type],
+                month: month || '',
                 date: new Date().toISOString()
             });
 
             saveData();
             renderPayments();
+            
+            // Limpiar selector de mes
+            document.getElementById('pMonth').value = '';
+            document.getElementById('pMonth').style.display = 'none';
+            
             alert('Pago registrado');
         }
 
@@ -1117,6 +1139,10 @@
             var list = document.getElementById('paymentsList');
             var searchTerm = document.getElementById('searchPayment') ? document.getElementById('searchPayment').value.toLowerCase() : '';
             list.innerHTML = '';
+            
+            // Actualizar contador
+            var countEl = document.getElementById('paymentCount');
+            if (countEl) countEl.textContent = payments.length;
 
             if (payments.length === 0) {
                 list.innerHTML = '<p style="color: #999;">No hay pagos registrados</p>';
@@ -1146,8 +1172,9 @@
                 
                 // Crear contenido del item
                 var info = document.createElement('div');
+                var monthText = p.month ? ' - <span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">' + p.month + '</span>' : '';
                 info.innerHTML = '<strong>' + studentName + '</strong><br>' + 
-                               p.type + ' - RD$ ' + p.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '<br>' +
+                               p.type + monthText + ' - RD$ ' + p.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '<br>' +
                                '<small>' + new Date(p.date).toLocaleString('es-DO') + '</small>';
                 
                 // Contenedor de botones
