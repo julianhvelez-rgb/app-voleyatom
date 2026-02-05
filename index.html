@@ -314,6 +314,36 @@
             h1 { font-size: 28px; }
             #menu { grid-template-columns: 1fr 1fr; }
         }
+        
+        /* Indicador de sincronización flotante */
+        #syncIndicator {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: #6b7280;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 9999;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #syncIndicator:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+        }
+        #syncIndicator.active {
+            background: #10b981;
+        }
+        #syncIndicator.inactive {
+            background: #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -674,6 +704,14 @@
             
             syncListenerAttached = true;
             updateCloudSyncStatus('🔄 Sincronización activa', '#3b82f6');
+            
+            // Actualizar indicador visual
+            var indicator = document.getElementById('syncIndicator');
+            var indicatorText = document.getElementById('syncIndicatorText');
+            if (indicator && indicatorText) {
+                indicator.className = 'active';
+                indicatorText.textContent = 'Sincronización: ON';
+            }
         }
 
         // Activar/desactivar sincronización en la nube
@@ -692,13 +730,21 @@
             cloudSyncEnabled = !cloudSyncEnabled;
             localStorage.setItem('cloudSyncEnabled', cloudSyncEnabled.toString());
             
+            // Actualizar indicador visual
+            var indicator = document.getElementById('syncIndicator');
+            var indicatorText = document.getElementById('syncIndicatorText');
+            
             if (cloudSyncEnabled) {
                 startCloudSync();
                 saveData(); // Sincronizar datos actuales
+                indicator.className = 'active';
+                indicatorText.textContent = 'Sincronización: ON';
                 alert('✅ SINCRONIZACIÓN AUTOMÁTICA ACTIVADA\n\n' +
                       '📡 Tus datos se sincronizarán automáticamente en todos tus dispositivos cuando tengas internet.\n\n' +
                       '💾 Los cambios se guardan tanto localmente como en la nube.');
             } else {
+                indicator.className = 'inactive';
+                indicatorText.textContent = 'Sincronización: OFF';
                 alert('⏸️ SINCRONIZACIÓN AUTOMÁTICA DESACTIVADA\n\n' +
                       '💾 Tus datos solo se guardarán localmente en este dispositivo.\n\n' +
                       'Usa "Exportar Datos" para sincronizar manualmente.');
@@ -2724,6 +2770,22 @@
         // Inicializar
         loadData();
         
+        // Inicializar indicador visual de sincronización
+        setTimeout(function() {
+            var indicator = document.getElementById('syncIndicator');
+            var indicatorText = document.getElementById('syncIndicatorText');
+            if (indicator && indicatorText) {
+                if (cloudSyncEnabled && db) {
+                    indicator.className = 'active';
+                    indicatorText.textContent = 'Sincronización: ON';
+                    startCloudSync();
+                } else {
+                    indicator.className = 'inactive';
+                    indicatorText.textContent = 'Sincronización: OFF';
+                }
+            }
+        }, 500);
+        
         // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
@@ -2768,6 +2830,12 @@
                 <button class="btn-danger" onclick="closeEditModal()">❌ Cancelar</button>
             </div>
         </div>
+    </div>
+    
+    <!-- Indicador de sincronización flotante -->
+    <div id="syncIndicator" onclick="toggleCloudSync()" title="Click para activar/desactivar sincronización">
+        <span id="syncIndicatorIcon">☁️</span>
+        <span id="syncIndicatorText">Sincronización: OFF</span>
     </div>
 </body>
 </html>
