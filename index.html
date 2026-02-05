@@ -1524,49 +1524,120 @@
             return new Uint8Array(commands);
         }
 
-        // Copiar recibo al portapapeles (Clipboard API moderna)
+        // Copiar recibo al portapapeles (Clipboard API moderna con mejor manejo)
         async function copyReceiptToClipboard() {
+            console.log('📋 Intentando copiar recibo...');
+            console.log('Texto a copiar (primeras 100 chars):', currentReceipt.text.substring(0, 100));
+            
+            // Método 1: Intentar con Clipboard API moderna
             try {
-                // Intentar con la API moderna del Clipboard
                 if (navigator.clipboard && navigator.clipboard.writeText) {
+                    console.log('✅ Usando Clipboard API moderna');
                     await navigator.clipboard.writeText(currentReceipt.text);
-                    alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
+                    console.log('✅ Copiado exitosamente con API moderna');
+                    alert('✅ RECIBO COPIADO AL PORTAPAPELES\n\n📝 ' + currentReceipt.text.length + ' caracteres copiados\n\n📱 Ahora puedes:\n1. Abrir Bluetooth Printer\n2. Pegar con Ctrl+V (o mantén presionado)\n3. Conectar a tu impresora\n4. Presionar Imprimir');
                     closePrintModal();
-                } else {
-                    // Fallback para navegadores antiguos
-                    copyToClipboardFallback(currentReceipt.text, function() {
-                        alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
-                        closePrintModal();
-                    });
+                    return;
                 }
             } catch (err) {
-                console.error('Error al copiar:', err);
-                // Intentar método fallback
-                copyToClipboardFallback(currentReceipt.text, function() {
-                    alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
+                console.warn('⚠️ Error con API moderna:', err.name, err.message);
+                // Si falla por permisos, intentar pedir permiso
+                if (err.name === 'NotAllowedError') {
+                    alert('⚠️ PERMISOS NECESARIOS\n\nTu navegador necesita permiso para acceder al portapapeles.\n\nPor favor, permite el acceso cuando te lo pida.');
+                }
+            }
+            
+            // Método 2: Fallback tradicional (funciona sin permisos especiales)
+            console.log('🔄 Usando método fallback tradicional...');
+            try {
+                var textarea = document.createElement('textarea');
+                textarea.value = currentReceipt.text;
+                
+                // Hacer visible temporalmente para mejor compatibilidad
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.width = '2em';
+                textarea.style.height = '2em';
+                textarea.style.padding = '0';
+                textarea.style.border = 'none';
+                textarea.style.outline = 'none';
+                textarea.style.boxShadow = 'none';
+                textarea.style.background = 'transparent';
+                textarea.style.zIndex = '999999';
+                
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                // Para iOS
+                textarea.setSelectionRange(0, 99999);
+                
+                var successful = document.execCommand('copy');
+                console.log('execCommand result:', successful);
+                
+                document.body.removeChild(textarea);
+                
+                if (successful) {
+                    console.log('✅ Copiado exitosamente con método tradicional');
+                    alert('✅ RECIBO COPIADO AL PORTAPAPELES\n\n📝 ' + currentReceipt.text.length + ' caracteres copiados\n\n👉 PRUEBA AHORA:\nPresiona Ctrl+V en cualquier lugar para verificar que se copió correctamente\n\n📱 Luego usa Bluetooth Printer para imprimir');
                     closePrintModal();
-                });
+                } else {
+                    throw new Error('execCommand retornó false');
+                }
+            } catch (err) {
+                console.error('❌ Error en método fallback:', err);
+                // Método 3: Mostrar el texto para copiar manualmente
+                alert('❌ NO SE PUDO COPIAR AUTOMÁTICAMENTE\n\n🔧 SOLUCIÓN MANUAL:\n\n1. Se mostrará el recibo en pantalla\n2. Selecciona TODO el texto (Ctrl+A)\n3. Copia manualmente (Ctrl+C)\n4. Úsalo en tu impresora');
+                
+                // Crear ventana con texto seleccionable
+                var modal = document.getElementById('printModal');
+                var content = document.querySelector('#printModal .modal-content');
+                var preview = document.getElementById('receiptPreview');
+                preview.style.userSelect = 'text';
+                preview.style.cursor = 'text';
+                preview.style.background = '#fff';
+                preview.style.color = '#000';
+                preview.textContent = currentReceipt.text;
+                
+                alert('👆 El recibo está visible arriba.\n\nSELECCIONA TODO (Ctrl+A) y COPIA (Ctrl+C)');
             }
         }
 
         // Función auxiliar para copiar al portapapeles (método antiguo como fallback)
         function copyToClipboardFallback(text, successCallback) {
+            console.log('📋 Ejecutando copyToClipboardFallback...');
             var textarea = document.createElement('textarea');
             textarea.value = text;
             textarea.style.position = 'fixed';
             textarea.style.top = '0';
             textarea.style.left = '0';
-            textarea.style.opacity = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            
             document.body.appendChild(textarea);
             textarea.focus();
             textarea.select();
             
+            // Para iOS
+            try {
+                textarea.setSelectionRange(0, 99999);
+            } catch (e) {
+                console.log('setSelectionRange no disponible');
+            }
+            
             try {
                 var successful = document.execCommand('copy');
+                console.log('execCommand successful:', successful);
                 if (successful && successCallback) {
                     successCallback();
                 } else if (!successful) {
-                    alert('❌ No se pudo copiar automáticamente\n\n⚠️ Tu navegador no soporta copiar al portapapeles.\n\nUsá Chrome, Edge o Firefox actualizado.');
+                    alert('❌ No se pudo copiar automáticamente\n\n⚠️ Tu navegador no soporta copiar al portapapeles.\n\n✅ Usa Chrome, Edge o Firefox actualizado.');
                 }
             } catch (err) {
                 console.error('Error al copiar:', err);
@@ -2004,47 +2075,112 @@
         // Función de prueba del portapapeles
         async function testClipboard() {
             var testText = '✅ ¡Portapapeles funcionando! - VolleyAtom ' + new Date().toLocaleString('es-DO');
+            console.log('🧪 Iniciando prueba de portapapeles...');
+            console.log('Texto de prueba:', testText);
             
+            // Método 1: API Moderna
             try {
-                // Intentar con la API moderna del Clipboard
                 if (navigator.clipboard && navigator.clipboard.writeText) {
+                    console.log('Intentando con Clipboard API moderna...');
                     await navigator.clipboard.writeText(testText);
+                    console.log('✅ Éxito con API moderna');
+                    
                     document.getElementById('syncStatus').innerHTML = 
                         '<div class="info" style="background:#d1fae5;border-left-color:#10b981;">' +
-                        '✅ <strong>Portapapeles ACTIVO</strong><br><br>' +
+                        '✅ <strong>PORTAPAPELES ACTIVO - API MODERNA</strong><br><br>' +
                         '🎉 Tu navegador soporta la Clipboard API moderna<br>' +
-                        '📋 Texto copiado: "' + testText + '"<br><br>' +
-                        '💡 Presiona <strong>Ctrl+V</strong> (o Cmd+V en Mac) para pegar' +
+                        '📝 Texto copiado: "' + testText + '"<br><br>' +
+                        '👉 <strong>PRUEBA AHORA:</strong><br>' +
+                        '• Abre Bloc de Notas o cualquier editor<br>' +
+                        '• Presiona <strong>Ctrl+V</strong> (o Cmd+V en Mac)<br>' +
+                        '• Debería aparecer el texto de arriba<br><br>' +
+                        '🚀 Todo funciona correctamente!' +
                         '</div>';
-                } else {
-                    // Intentar con el método fallback
-                    copyToClipboardFallback(testText, function() {
-                        document.getElementById('syncStatus').innerHTML = 
-                            '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">' +
-                            '⚠️ <strong>Portapapeles ACTIVO (Método antiguo)</strong><br><br>' +
-                            '📋 Tu navegador usa el método antiguo pero funciona<br>' +
-                            '💡 Presiona <strong>Ctrl+V</strong> para pegar<br><br>' +
-                            '🔄 Considera actualizar a Chrome, Edge o Firefox moderno' +
-                            '</div>';
-                    });
+                    
+                    // Intentar leer para confirmar
+                    try {
+                        var readText = await navigator.clipboard.readText();
+                        if (readText === testText) {
+                            console.log('✅ Verificado: el texto está en el portapapeles');
+                        }
+                    } catch (e) {
+                        console.log('⚠️ No se pudo verificar (normal si no hay permiso de lectura)');
+                    }
+                    
+                    setTimeout(function() {
+                        document.getElementById('syncStatus').innerHTML = '';
+                    }, 10000);
+                    return;
                 }
             } catch (err) {
-                console.error('Error en portapapeles:', err);
+                console.error('Error con API moderna:', err.name, err.message);
+            }
+            
+            // Método 2: Fallback tradicional
+            console.log('Intentando con método tradicional...');
+            try {
+                var textarea = document.createElement('textarea');
+                textarea.value = testText;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '50%';
+                textarea.style.left = '50%';
+                textarea.style.transform = 'translate(-50%, -50%)';
+                textarea.style.width = '300px';
+                textarea.style.height = '100px';
+                textarea.style.padding = '10px';
+                textarea.style.fontSize = '14px';
+                textarea.style.zIndex = '10000';
+                textarea.style.background = '#fff';
+                textarea.style.border = '3px solid #10b981';
+                
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                
+                var successful = document.execCommand('copy');
+                console.log('execCommand result:', successful);
+                
+                // Mantener visible 2 segundos para que el usuario vea
+                setTimeout(function() {
+                    document.body.removeChild(textarea);
+                }, 2000);
+                
+                if (successful) {
+                    console.log('✅ Éxito con método tradicional');
+                    document.getElementById('syncStatus').innerHTML = 
+                        '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">' +
+                        '✅ <strong>PORTAPAPELES ACTIVO (MÉTODO TRADICIONAL)</strong><br><br>' +
+                        '📝 Tu navegador usa el método antiguo pero <strong>FUNCIONA</strong><br>' +
+                        '📝 Texto copiado: "' + testText + '"<br><br>' +
+                        '👉 <strong>PRUEBA AHORA:</strong><br>' +
+                        '• Abre Bloc de Notas<br>' +
+                        '• Presiona <strong>Ctrl+V</strong><br>' +
+                        '• Debería aparecer el texto<br><br>' +
+                        '🔄 Considera actualizar a Chrome, Edge o Firefox moderno' +
+                        '</div>';
+                } else {
+                    throw new Error('execCommand retornó false');
+                }
+            } catch (err) {
+                console.error('Error en prueba:', err);
                 document.getElementById('syncStatus').innerHTML = 
                     '<div class="info" style="background:#fecaca;border-left-color:#ef4444;">' +
-                    '❌ <strong>Error en portapapeles</strong><br><br>' +
+                    '❌ <strong>ERROR EN PORTAPAPELES</strong><br><br>' +
                     'Error: ' + err.message + '<br><br>' +
                     '🔧 <strong>Soluciones:</strong><br>' +
-                    '1. Usa Chrome, Edge o Firefox actualizado<br>' +
-                    '2. Asegúrate de estar en HTTPS o localhost<br>' +
-                    '3. Verifica permisos del navegador<br>' +
-                    '4. Usa "💾 Descargar Datos" como alternativa' +
+                    '1. <strong>Usa Chrome, Edge o Firefox</strong> actualizado<br>' +
+                    '2. Asegúrate de estar en <strong>HTTPS</strong> o localhost<br>' +
+                    '3. Verifica permisos del navegador (icono candado)<br>' +
+                    '4. Abre la Consola (F12) para ver errores<br>' +
+                    '5. Usa "💾 Descargar Datos" como alternativa<br><br>' +
+                    '🌐 Navegador: ' + navigator.userAgent.substring(0, 50) + '...' +
                     '</div>';
             }
             
             setTimeout(function() {
                 document.getElementById('syncStatus').innerHTML = '';
-            }, 8000);
+            }, 12000);
         }
         
         // Importar datos desde archivo JSON
