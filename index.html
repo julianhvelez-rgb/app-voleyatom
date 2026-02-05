@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VolleyAtom">
+    <meta name="description" content="Sistema de gestión para academia de voleibol">
+    <title>VolleyAtom</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Iconos para diferentes dispositivos -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23grad)'/%3E%3Ccircle cx='50' cy='35' r='18' fill='white' opacity='0.95'/%3E%3Cpath d='M 30 55 Q 35 50 40 55 L 45 65 Q 50 60 55 65 L 60 55 Q 65 50 70 55' stroke='white' stroke-width='4' fill='none' stroke-linecap='round' opacity='0.95'/%3E%3Ctext x='50' y='90' font-family='Arial, sans-serif' font-size='16' font-weight='bold' fill='white' text-anchor='middle'%3EVA%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='url(%23grad)'/%3E%3Ccircle cx='90' cy='60' r='32' fill='white' opacity='0.95'/%3E%3Cpath d='M 50 95 Q 60 85 70 95 L 80 115 Q 90 105 100 115 L 110 95 Q 120 85 130 95' stroke='white' stroke-width='7' fill='none' stroke-linecap='round' opacity='0.95'/%3E%3Ctext x='90' y='160' font-family='Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'%3EVA%3C/text%3E%3C/svg%3E">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            padding: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 650px;
+            margin: 20px auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5) inset;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 { 
+            color: #2d3748; 
+            margin-bottom: 15px; 
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+            letter-spacing: -0.5px;
+        }
+        h2 { 
+            color: #4a5568; 
+            margin-bottom: 25px; 
+            text-align: center; 
+            font-size: 22px;
+            font-weight: 600;
+        }
+        h3 { 
+            color: #2d3748; 
+            margin: 25px 0 15px 0; 
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        button:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        button:active { 
+            transform: translateY(-1px) scale(0.98); 
+        }
+        .btn-success { 
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); 
+        }
+        .btn-success:hover { 
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5); 
+        }
+        .btn-danger { 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); 
+        }
+        .btn-danger:hover { 
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5); 
+        }
+        .btn-secondary { 
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); 
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
+        }
+        .btn-secondary:hover { 
+            box-shadow: 0 8px 25px rgba(107, 114, 128, 0.5); 
+        }
+        /* Modal de impresión */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .receipt-preview {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            border: 2px dashed #ddd;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .modal-buttons {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            margin: 0;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+        }
+        .hidden { display: none; }
+        .info { 
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 18px; 
+            border-radius: 12px; 
+            margin: 20px 0; 
+            border-left: 5px solid #10b981;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info::before {
+            content: '💡';
+            font-size: 24px;
+        }
+        #menu { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px; 
+            margin-bottom: 25px; 
+        }
+        #menu button { 
+            padding: 18px 12px; 
+            font-size: 16px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .item { 
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            padding: 20px; 
+            margin: 12px 0; 
+            border-radius: 16px; 
+            border-left: 5px solid #667eea;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .item:hover {
+            transform: translateY(-4px) translateX(4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+            border-left-color: #764ba2;
+        }
+        .item:hover::before { opacity: 1; }
+        .item strong { 
+            color: #2d3748; 
+            font-size: 18px; 
+            display: block;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .item small { 
+            color: #718096; 
+            font-size: 13px;
+            position: relative;
+            z-index: 1;
+        }
+        .item button {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        #userDisplay {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
+        }
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        @media (max-width: 600px) {
+            .card { padding: 20px; margin: 10px auto; }
+            h1 { font-size: 28px; }
+            #menu { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loginSection" class="card hidden">
+        <h1>⚡ VolleyAtom</h1>
+        <h2>Iniciar sesión</h2>
+        <input type="text" id="user" value="admin" placeholder="Usuario">
+        <input type="password" id="pass" value="admin" placeholder="Contraseña">
+        <button id="btnLogin" onclick="login()">Entrar</button>
+        <div class="info">Usuario: <strong>admin</strong> / Contraseña: <strong>admin</strong></div>
+    </div>
+
+    <div id="mainSection">
+        <div class="card">
+            <h1>⚡ VolleyAtom</h1>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span id="userDisplay" style="background: #667eea; color: white; padding: 8px 15px; border-radius: 20px;"></span>
+            </div>
+            
+            <div id="menu">
+                <button onclick="showView('students')">👥 Estudiantes</button>
+                <button onclick="showView('payments')">💰 Pagos</button>
+                <button onclick="showView('attendance')">📅 Asistencias</button>
+                <button onclick="showView('reports')">📊 Reportes</button>
+                <button onclick="showView('sync')">🔄 Sincronizar</button>
+                <button class="btn-danger" onclick="logout()">🚪 Salir</button>
+            </div>
+
+            <div id="studentsView" class="hidden">
+                <h3>✏️ Agregar Estudiante</h3>
+                <input type="text" id="sName" placeholder="Nombre completo del estudiante">
+                <input type="date" id="sAge" placeholder="Fecha de nacimiento">
+                <input type="text" id="sParentName" placeholder="Nombre del padre/madre/tutor">
+                <input type="text" id="sContact" placeholder="Teléfono principal">
+                <input type="text" id="sParentContact" placeholder="Teléfono del padre/madre">
+                <select id="sSchedule">
+                    <option value="">Seleccionar Horario</option>
+                    <option value="Sábado 2:00 PM - 4:00 PM">🕑 Sábado 2:00 PM - 4:00 PM</option>
+                    <option value="Sábado 4:00 PM - 6:00 PM">🕓 Sábado 4:00 PM - 6:00 PM</option>
+                </select>
+                <button class="btn-success" onclick="addStudent()">➕ Agregar Estudiante</button>
+                <h3 style="margin-top: 30px;">📋 Lista de Estudiantes</h3>
+                <input type="text" id="searchStudent" placeholder="🔍 Buscar estudiante por nombre..." 
+                       oninput="filterStudents()" 
+                       style="margin-bottom: 15px; background: #f7fafc;">
+                <div id="studentsList"></div>
+            </div>
+
+            <div id="paymentsView" class="hidden">
+                <h3>💳 Registrar Pago</h3>
+                <select id="pStudent">
+                    <option value="">Seleccionar estudiante</option>
+                </select>
+                <select id="pType">
+                    <option value="inscripcion">Inscripción - RD$ 1,000.00</option>
+                    <option value="mensualidad">Mensualidad - RD$ 1,000.00</option>
+                    <option value="camiseta">Camiseta - RD$ 500.00</option>
+                </select>
+                <select id="pMethod">
+                    <option value="efectivo">💵 Efectivo</option>
+                    <option value="transferencia">🏦 Transferencia</option>
+                </select>
+                <button class="btn-success" onclick="addPayment()">✅ Registrar Pago</button>
+                <h3 style="margin-top: 30px;">💰 Últimos Pagos</h3>
+                <input type="text" id="searchPayment" placeholder="🔍 Buscar pago por estudiante..." 
+                       oninput="filterPayments()" 
+                       style="margin-bottom: 15px; background: #f7fafc;">
+                <div id="paymentsList"></div>
+            </div>
+
+            <div id="reportsView" class="hidden">
+                <h3>📊 Reporte de Pagos</h3>
+                <button class="btn-secondary" onclick="showReport()">Generar Reporte</button>
+                <div id="reportResult"></div>
+            </div>
+
+            <div id="attendanceView" class="hidden">
+                <h3>📅 Asistencias - Hoy: <span id="todayDate"></span></h3>
+                <button class="btn-secondary" onclick="showAttendanceReport()">📊 Ver Reporte de Asistencias</button>
+                
+                <h3 style="margin-top: 30px;">🕑 Horario 2:00 PM - 4:00 PM</h3>
+                <button class="btn-success" onclick="markAllPresentBySchedule('Sábado 2:00 PM - 4:00 PM')">✅ Marcar Todos Presentes (2-4pm)</button>
+                <div id="attendanceList1" style="margin-top: 15px;"></div>
+                
+                <h3 style="margin-top: 30px;">🕓 Horario 4:00 PM - 6:00 PM</h3>
+                <button class="btn-success" onclick="markAllPresentBySchedule('Sábado 4:00 PM - 6:00 PM')">✅ Marcar Todos Presentes (4-6pm)</button>
+                <div id="attendanceList2" style="margin-top: 15px;"></div>
+                
+                <div id="attendanceReport" style="margin-top: 30px;"></div>
+            </div>
+
+            <div id="syncView" class="hidden">
+                <h3>🔄 Sincronización de Datos</h3>
+                <div class="info">
+                    📱 Sincroniza tus datos entre teléfonos y computadora. <strong>Exporta</strong> los datos, compártelos y luego <strong>importa</strong> en el otro dispositivo.
+                </div>
+                
+                <h3 style="margin-top: 30px;">📤 Exportar Datos</h3>
+                <button class="btn-success" onclick="exportData()">💾 Descargar Datos (JSON)</button>
+                <button class="btn-secondary" onclick="shareData()">📤 Compartir Datos</button>
+                
+                <h3 style="margin-top: 30px;">📥 Importar Datos</h3>
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData()">
+                <button class="btn-success" onclick="document.getElementById('importFile').click()">📂 Cargar Archivo JSON</button>
+                
+                <div id="syncStatus" style="margin-top: 20px;"></div>
+                
+                <h3 style="margin-top: 30px;">ℹ️ Información</h3>
+                <div style="background:#f9f9f9;padding:15px;border-radius:10px;font-size:14px;">
+                    <p><strong>📊 Resumen de Datos:</strong></p>
+                    <p>Estudiantes: <span id="syncStudents">0</span></p>
+                    <p>Pagos: <span id="syncPayments">0</span></p>
+                    <p>Asistencias: <span id="syncAttendance">0</span></p>
+                    <p style="margin-top:10px;"><strong>🗓️ Última exportación:</strong> <span id="lastExport">Nunca</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Impresión -->
+    <div id="printModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="close-modal" onclick="closePrintModal()">×</button>
+            <h2 style="margin-bottom: 20px; color: #2d3748;">🖨️ Imprimir Recibo</h2>
+            <div id="printerStatus" style="padding: 12px; margin-bottom: 15px; border-radius: 8px; font-size: 14px; display: none;"></div>
+            <div id="receiptPreview" class="receipt-preview"></div>
+            <div class="modal-buttons">
+                <button class="btn-success" onclick="sendToBluetoothPrinter()">📱 Enviar a Bluetooth Printer</button>
+                <button class="btn-secondary" onclick="copyReceiptToClipboard()">📋 Copiar al Portapapeles</button>
+                <button onclick="printFromBrowser()">🖨️ Imprimir desde Navegador</button>
+                <button class="btn-secondary" onclick="disconnectPrinter()" id="disconnectBtn" style="display: none;">🔌 Desconectar Impresora</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado de la aplicación
+        var users = [{user: 'admin', pass: 'admin'}];
+        var students = [];
+        var payments = [];
+        var attendance = [];
+        var currentUser = null;
+
+        // Cargar datos e iniciar sesión automáticamente
+        function loadData() {
+            try {
+                var saved = localStorage.getItem('volleyatom_data');
+                if (saved) {
+                    var data = JSON.parse(saved);
+                    users = data.users || users;
+                    students = data.students || [];
+                    payments = data.payments || [];
+                    attendance = data.attendance || [];
+                }
+            } catch(e) {
+                console.error('Error cargando datos:', e);
+            }
+        }
+
+        // Guardar datos
+        function saveData() {
+            localStorage.setItem('volleyatom_data', JSON.stringify({
+                users: users,
+                students: students,
+                payments: payments,
+                attendance: attendance
+            }));
+        }
+
+        // Login
+        function login() {
+            var u = document.getElementById('user').value;
+            var p = document.getElementById('pass').value;
+            
+            var found = users.find(function(user) {
+                return user.user === u && user.pass === p;
+            });
+
+            if (found) {
+                currentUser = u;
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+                document.getElementById('userDisplay').textContent = '👤 ' + u;
+                showView('students');
+            } else {
+                alert('Usuario o contraseña incorrectos');
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+        }
+
+        // Mostrar vista
+        function showView(view) {
+            document.getElementById('studentsView').classList.add('hidden');
+            document.getElementById('paymentsView').classList.add('hidden');
+            document.getElementById('reportsView').classList.add('hidden');
+            document.getElementById('attendanceView').classList.add('hidden');
+            document.getElementById('syncView').classList.add('hidden');
+            
+            if (view === 'students') {
+                document.getElementById('studentsView').classList.remove('hidden');
+                renderStudents();
+            } else if (view === 'payments') {
+                document.getElementById('paymentsView').classList.remove('hidden');
+                renderPayments();
+                updateStudentSelect();
+            } else if (view === 'reports') {
+                document.getElementById('reportsView').classList.remove('hidden');
+                document.getElementById('reportResult').innerHTML = '';
+            } else if (view === 'attendance') {
+                document.getElementById('attendanceView').classList.remove('hidden');
+                renderAttendance();
+            } else if (view === 'sync') {
+                document.getElementById('syncView').classList.remove('hidden');
+                updateSyncInfo();
+            }
+        }
+
+        // Agregar estudiante
+        function addStudent() {
+            var name = document.getElementById('sName').value;
+            var age = document.getElementById('sAge').value;
+            var parentName = document.getElementById('sParentName').value;
+            var contact = document.getElementById('sContact').value;
+            var parentContact = document.getElementById('sParentContact').value;
+            var schedule = document.getElementById('sSchedule').value;
+
+            if (!name) {
+                alert('El nombre del estudiante es obligatorio');
+                return;
+            }
+
+            students.push({
+                id: Date.now(),
+                name: name,
+                age: age || '',
+                parentName: parentName || '',
+                contact: contact || '',
+                parentContact: parentContact || '',
+                schedule: schedule || ''
+            });
+
+            saveData();
+            document.getElementById('sName').value = '';
+            document.getElementById('sAge').value = '';
+            document.getElementById('sParentName').value = '';
+            document.getElementById('sContact').value = '';
+            document.getElementById('sParentContact').value = '';
+            document.getElementById('sSchedule').value = '';
+            renderStudents();
+            alert('✅ Estudiante agregado correctamente');
+        }
+
+        // Mostrar estudiantes
+        function renderStudents() {
+            var list = document.getElementById('studentsList');
+            var searchTerm = document.getElementById('searchStudent') ? document.getElementById('searchStudent').value.toLowerCase() : '';
+            list.innerHTML = '';
+
+            if (students.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay estudiantes registrados</div>';
+                return;
+            }
+
+            // Filtrar estudiantes por búsqueda
+            var filteredStudents = students.filter(function(s) {
+                return s.name.toLowerCase().includes(searchTerm);
+            });
+
+            if (filteredStudents.length === 0) {
+                list.innerHTML = '<div class="empty-state">No se encontraron estudiantes con "' + searchTerm + '"</div>';
+                return;
+            }
+
+            filteredStudents.forEach(function(s) {
+                var div = document.createElement('div');
+                div.className = 'item';
+                
+                // Calcular estado de pagos
+                var studentPayments = payments.filter(function(p) { return p.studentId === s.id; });
+                var lastPayment = studentPayments.length > 0 ? studentPayments[studentPayments.length - 1] : null;
+                var daysLate = 0;
+                var paymentStatus = '⚠️ Sin pagos';
+                var statusColor = '#ef4444';
+                
+                if (lastPayment) {
+                    var lastDate = new Date(lastPayment.date);
+                    var today = new Date();
+                    var daysDiff = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                    daysLate = Math.max(0, daysDiff - 30);
+                    
+                    if (daysLate === 0) {
+                        paymentStatus = '✅ Al día';
+                        statusColor = '#10b981';
+                    } else {
+                        paymentStatus = '⏰ ' + daysLate + ' días atrasado';
+                        statusColor = '#ef4444';
+                    }
+                }
+                
+                // Calcular asistencias
+                var studentAttendance = attendance.filter(function(a) { return a.studentId === s.id; });
+                var totalDays = 30; // Días del mes
+                var presentDays = studentAttendance.filter(function(a) { return a.present; }).length;
+                var attendancePercent = studentAttendance.length > 0 ? Math.round((presentDays / studentAttendance.length) * 100) : 0;
+                var attendanceColor = attendancePercent >= 80 ? '#10b981' : attendancePercent >= 60 ? '#f59e0b' : '#ef4444';
+                
+                var info = document.createElement('div');
+                var html = '<strong>' + s.name + '</strong><br>';
+                if (s.age) html += 'Fecha de nacimiento: ' + s.age + '<br>';
+                if (s.parentName) html += '👨‍👩‍👦 Padre/Tutor: ' + s.parentName + '<br>';
+                if (s.contact) html += '📞 Tel. Principal: ' + s.contact + '<br>';
+                if (s.parentContact) html += '📱 Tel. Padre: ' + s.parentContact + '<br>';
+                if (s.schedule) html += 'Horario: ' + s.schedule + '<br>';
+                html += '<span style="color: ' + statusColor + '; font-weight: bold;">' + paymentStatus + '</span><br>';
+                html += '<span style="color: ' + attendanceColor + '; font-weight: bold;">📊 Asistencia: ' + attendancePercent + '%</span> (' + presentDays + '/' + studentAttendance.length + ' días)';
+                info.innerHTML = html;
+                
+                // Botón de eliminar
+                var deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-danger';
+                deleteBtn.style.marginTop = '10px';
+                deleteBtn.style.width = 'auto';
+                deleteBtn.style.padding = '8px 16px';
+                deleteBtn.innerHTML = '🗑️ Eliminar';
+                deleteBtn.onclick = function() {
+                    deleteStudent(s.id);
+                };
+                
+                div.appendChild(info);
+                div.appendChild(deleteBtn);
+                list.appendChild(div);
+            });
+            updateStudentSelect();
+        }
+
+        // Filtrar estudiantes por búsqueda
+        function filterStudents() {
+            renderStudents();
+        }
+
+        // Eliminar estudiante
+        function deleteStudent(studentId) {
+            var student = students.find(function(s) { return s.id === studentId; });
+            if (!student) return;
+            
+            if (confirm('¿Eliminar a ' + student.name + '?\n\nEsto también eliminará todos sus pagos.')) {
+                // Eliminar pagos del estudiante
+                payments = payments.filter(function(p) { return p.studentId !== studentId; });
+                // Eliminar estudiante
+                students = students.filter(function(s) { return s.id !== studentId; });
+                saveData();
+                renderStudents();
+                alert('✅ Estudiante eliminado');
+            }
+        }
+
+        // Actualizar select de estudiantes
+        function updateStudentSelect() {
+            var select = document.getElementById('pStudent');
+            select.innerHTML = '<option value="">Seleccionar estudiante</option>';
+            
+            students.forEach(function(s) {
+                var option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Agregar pago
+        function addPayment() {
+            var studentId = document.getElementById('pStudent').value;
+            var type = document.getElementById('pType').value;
+            var method = document.getElementById('pMethod').value;
+
+            if (!studentId) {
+                alert('Selecciona un estudiante');
+                return;
+            }
+
+            var amounts = {
+                'inscripcion': 1000,
+                'mensualidad': 1000,
+                'camiseta': 500
+            };
+
+            payments.push({
+                id: Date.now(),
+                studentId: parseInt(studentId),
+                type: type,
+                method: method,
+                amount: amounts[type],
+                date: new Date().toISOString()
+            });
+
+            saveData();
+            renderPayments();
+            alert('Pago registrado');
+        }
+
+        // Mostrar pagos
+        function renderPayments() {
+            var list = document.getElementById('paymentsList');
+            var searchTerm = document.getElementById('searchPayment') ? document.getElementById('searchPayment').value.toLowerCase() : '';
+            list.innerHTML = '';
+
+            if (payments.length === 0) {
+                list.innerHTML = '<p style="color: #999;">No hay pagos registrados</p>';
+                return;
+            }
+
+            var recent = payments.slice(-10).reverse();
+            
+            // Filtrar pagos por nombre del estudiante
+            var filteredPayments = recent.filter(function(p) {
+                var student = students.find(function(s) { return s.id === p.studentId; });
+                var studentName = student ? student.name.toLowerCase() : '';
+                return studentName.includes(searchTerm);
+            });
+
+            if (filteredPayments.length === 0) {
+                list.innerHTML = '<p style="color: #999;">No se encontraron pagos con "' + searchTerm + '"</p>';
+                return;
+            }
+
+            filteredPayments.forEach(function(p) {
+                var student = students.find(function(s) { return s.id === p.studentId; });
+                var studentName = student ? student.name : 'Estudiante no encontrado';
+                
+                var div = document.createElement('div');
+                div.className = 'item';
+                
+                // Crear contenido del item
+                var info = document.createElement('div');
+                info.innerHTML = '<strong>' + studentName + '</strong><br>' + 
+                               p.type + ' - RD$ ' + p.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '<br>' +
+                               '<small>' + new Date(p.date).toLocaleString('es-DO') + '</small>';
+                
+                // Contenedor de botones
+                var btnContainer = document.createElement('div');
+                btnContainer.style.display = 'flex';
+                btnContainer.style.gap = '8px';
+                btnContainer.style.marginTop = '10px';
+                
+                // Crear botón de imprimir
+                var printBtn = document.createElement('button');
+                printBtn.className = 'btn-success';
+                printBtn.style.flex = '1';
+                printBtn.innerHTML = '🖨️ Imprimir';
+                printBtn.onclick = function() {
+                    printReceipt(p.id);
+                };
+                
+                // Crear botón de eliminar
+                var deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-danger';
+                deleteBtn.style.flex = '1';
+                deleteBtn.innerHTML = '🗑️ Eliminar';
+                deleteBtn.onclick = function() {
+                    deletePayment(p.id);
+                };
+                
+                btnContainer.appendChild(printBtn);
+                btnContainer.appendChild(deleteBtn);
+                
+                div.appendChild(info);
+                div.appendChild(btnContainer);
+                list.appendChild(div);
+            });
+        }
+
+        // Filtrar pagos por búsqueda
+        function filterPayments() {
+            renderPayments();
+        }
+
+        // Eliminar pago
+        function deletePayment(paymentId) {
+            var payment = payments.find(function(p) { return p.id === paymentId; });
+            if (!payment) return;
+            
+            var student = students.find(function(s) { return s.id === payment.studentId; });
+            var studentName = student ? student.name : 'Desconocido';
+            
+            if (confirm('¿Eliminar recibo de pago?\n\nEstudiante: ' + studentName + '\nConcepto: ' + payment.type + '\nMonto: RD$ ' + payment.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}))) {
+                payments = payments.filter(function(p) { return p.id !== paymentId; });
+                saveData();
+                renderPayments();
+                alert('✅ Recibo eliminado');
+            }
+        }
+
+        // Generar reporte completo
+        function showReport() {
+            var report = '<h3>📊 Reporte General de Estudiantes</h3>';
+            
+            if (students.length === 0) {
+                report += '<div style="background:#f9f9f9;padding:15px;border-radius:8px;margin-top:10px;">';
+                report += '<p>No hay estudiantes registrados</p></div>';
+                document.getElementById('reportResult').innerHTML = report;
+                return;
+            }
+            
+            var today = new Date();
+            var alDia = [];
+            var atrasados = [];
+            var sinPagos = [];
+            
+            students.forEach(function(s) {
+                var studentPayments = payments.filter(function(p) { return p.studentId === s.id; });
+                var total = 0;
+                studentPayments.forEach(function(p) { total += p.amount; });
+                
+                var lastPayment = studentPayments.length > 0 ? studentPayments[studentPayments.length - 1] : null;
+                var daysLate = 0;
+                var status = '';
+                
+                if (lastPayment) {
+                    var lastDate = new Date(lastPayment.date);
+                    var daysDiff = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                    daysLate = Math.max(0, daysDiff - 30);
+                    status = daysLate === 0 ? 'alDia' : 'atrasado';
+                } else {
+                    status = 'sinPago';
+                }
+                
+                // Calcular asistencia
+                var studentAttendance = attendance.filter(function(a) { return a.studentId === s.id; });
+                var presentDays = studentAttendance.filter(function(a) { return a.present; }).length;
+                var attendancePercent = studentAttendance.length > 0 ? Math.round((presentDays / studentAttendance.length) * 100) : 0;
+                
+                var studentData = {
+                    name: s.name,
+                    payments: studentPayments.length,
+                    total: total,
+                    daysLate: daysLate,
+                    attendance: attendancePercent,
+                    presentDays: presentDays,
+                    totalDays: studentAttendance.length
+                };
+                
+                if (status === 'alDia') alDia.push(studentData);
+                else if (status === 'atrasado') atrasados.push(studentData);
+                else sinPagos.push(studentData);
+            });
+            
+            // Reporte de estudiantes al día
+            report += '<div style="background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);padding:20px;border-radius:12px;margin:15px 0;border-left:5px solid #10b981;">';
+            report += '<h4 style="color:#065f46;margin:0 0 15px 0;">✅ Estudiantes al Día (' + alDia.length + ')</h4>';
+            if (alDia.length === 0) {
+                report += '<p style="color:#6b7280;">No hay estudiantes al día</p>';
+            } else {
+                alDia.forEach(function(s) {
+                    report += '<div class="item" style="background:white;margin-bottom:10px;">';
+                    report += '<strong>' + s.name + '</strong><br>';
+                    report += '💰 Pagos: ' + s.payments + ' | Total: RD$ ' + s.total.toLocaleString('es-DO', {minimumFractionDigits: 2}) + '<br>';
+                    report += '📊 Asistencia: <span style="color:' + (s.attendance >= 80 ? '#10b981' : '#f59e0b') + ';font-weight:bold;">' + s.attendance + '%</span> (' + s.presentDays + '/' + s.totalDays + ' días)';
+                    report += '</div>';
+                });
+            }
+            report += '</div>';
+            
+            // Reporte de estudiantes atrasados
+            report += '<div style="background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);padding:20px;border-radius:12px;margin:15px 0;border-left:5px solid #f59e0b;">';
+            report += '<h4 style="color:#92400e;margin:0 0 15px 0;">⏰ Estudiantes con Pagos Atrasados (' + atrasados.length + ')</h4>';
+            if (atrasados.length === 0) {
+                report += '<p style="color:#6b7280;">No hay estudiantes atrasados</p>';
+            } else {
+                atrasados.forEach(function(s) {
+                    report += '<div class="item" style="background:white;margin-bottom:10px;">';
+                    report += '<strong>' + s.name + '</strong><br>';
+                    report += '⚠️ Atraso: <span style="color:#dc2626;font-weight:bold;">' + s.daysLate + ' días</span><br>';
+                    report += '💰 Pagos: ' + s.payments + ' | Total: RD$ ' + s.total.toLocaleString('es-DO', {minimumFractionDigits: 2}) + '<br>';
+                    report += '📊 Asistencia: <span style="color:' + (s.attendance >= 80 ? '#10b981' : s.attendance >= 60 ? '#f59e0b' : '#ef4444') + ';font-weight:bold;">' + s.attendance + '%</span> (' + s.presentDays + '/' + s.totalDays + ' días)';
+                    report += '</div>';
+                });
+            }
+            report += '</div>';
+            
+            // Reporte de estudiantes sin pagos
+            report += '<div style="background:linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);padding:20px;border-radius:12px;margin:15px 0;border-left:5px solid #ef4444;">';
+            report += '<h4 style="color:#7f1d1d;margin:0 0 15px 0;">❌ Estudiantes sin Pagos Recientes (' + sinPagos.length + ')</h4>';
+            if (sinPagos.length === 0) {
+                report += '<p style="color:#6b7280;">Todos los estudiantes tienen pagos</p>';
+            } else {
+                sinPagos.forEach(function(s) {
+                    report += '<div class="item" style="background:white;margin-bottom:10px;">';
+                    report += '<strong>' + s.name + '</strong><br>';
+                    report += '💰 Pagos: ' + s.payments + ' | Total: RD$ ' + s.total.toLocaleString('es-DO', {minimumFractionDigits: 2}) + '<br>';
+                    report += '📊 Asistencia: <span style="color:' + (s.attendance >= 80 ? '#10b981' : s.attendance >= 60 ? '#f59e0b' : '#ef4444') + ';font-weight:bold;">' + s.attendance + '%</span> (' + s.presentDays + '/' + s.totalDays + ' días)';
+                    report += '</div>';
+                });
+            }
+            report += '</div>';
+            
+            // Resumen general
+            report += '<div style="background:linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);padding:20px;border-radius:12px;margin:15px 0;border-left:5px solid #667eea;">';
+            report += '<h4 style="color:#3730a3;margin:0 0 10px 0;">📈 Resumen General</h4>';
+            report += '<p style="margin:5px 0;"><strong>Total estudiantes:</strong> ' + students.length + '</p>';
+            report += '<p style="margin:5px 0;"><strong>Al día:</strong> ' + alDia.length + ' (' + Math.round((alDia.length/students.length)*100) + '%)</p>';
+            report += '<p style="margin:5px 0;"><strong>Atrasados:</strong> ' + atrasados.length + ' (' + Math.round((atrasados.length/students.length)*100) + '%)</p>';
+            report += '<p style="margin:5px 0;"><strong>Sin pagos:</strong> ' + sinPagos.length + ' (' + Math.round((sinPagos.length/students.length)*100) + '%)</p>';
+            
+            var totalIngresos = 0;
+            payments.forEach(function(p) { totalIngresos += p.amount; });
+            report += '<p style="margin:15px 0 5px 0;font-size:18px;"><strong>💵 Ingresos totales: RD$ ' + totalIngresos.toLocaleString('es-DO', {minimumFractionDigits: 2}) + '</strong></p>';
+            report += '</div>';
+            
+            document.getElementById('reportResult').innerHTML = report;
+        }
+
+        // Variable global para almacenar el recibo actual
+        var currentReceipt = {
+            text: '',
+            studentName: '',
+            payment: null
+        };
+
+        // Imprimir recibo - Abre modal integrado
+        function printReceipt(paymentId) {
+            var payment = payments.find(function(p) { return p.id === paymentId; });
+            if (!payment) {
+                alert('❌ Pago no encontrado');
+                return;
+            }
+
+            var student = students.find(function(s) { return s.id === payment.studentId; });
+            var studentName = student ? student.name : 'N/A';
+
+            // Guardar datos del recibo
+            currentReceipt.text = generateTextReceipt(payment, studentName);
+            currentReceipt.studentName = studentName;
+            currentReceipt.payment = payment;
+
+            // Mostrar modal
+            document.getElementById('receiptPreview').textContent = currentReceipt.text;
+            document.getElementById('printModal').classList.add('show');
+            
+            // Actualizar estado de la impresora en el modal
+            updatePrinterStatus();
+        }
+
+        // Actualizar estado de la impresora en el modal
+        async function updatePrinterStatus() {
+            const statusDiv = document.getElementById('printerStatus');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            const isConnected = await isPrinterConnected();
+            
+            if (isConnected) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.style.border = '1px solid #c3e6cb';
+                statusDiv.innerHTML = '✅ Impresora conectada: <strong>' + connectedPrinter.name + '</strong><br>📝 Presiona "Enviar a Bluetooth Printer" para imprimir directamente';
+                disconnectBtn.style.display = 'block';
+            } else {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#fff3cd';
+                statusDiv.style.color = '#856404';
+                statusDiv.style.border = '1px solid #ffeeba';
+                statusDiv.innerHTML = '⚠️ No hay impresora conectada<br>📱 La primera vez se solicitará conectar';
+                disconnectBtn.style.display = 'none';
+            }
+        }
+
+        // Desconectar impresora manualmente
+        function disconnectPrinter() {
+            if (connectedPrinter && connectedPrinter.gatt.connected) {
+                connectedPrinter.gatt.disconnect();
+                console.log('🔌 Impresora desconectada manualmente');
+            }
+            connectedPrinter = null;
+            printerCharacteristic = null;
+            printerServer = null;
+            updatePrinterStatus();
+            alert('✅ Impresora desconectada\n\nEn la próxima impresión se solicitará conectar nuevamente.');
+        }
+
+        // Cerrar modal de impresión
+        function closePrintModal() {
+            document.getElementById('printModal').classList.remove('show');
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('printModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closePrintModal();
+                    }
+                });
+            }
+        });
+
+        // Variables globales para la impresora conectada
+        var connectedPrinter = null;
+        var printerCharacteristic = null;
+        var printerServer = null;
+
+        // Verificar si la impresora sigue conectada
+        async function isPrinterConnected() {
+            if (!connectedPrinter || !printerCharacteristic) {
+                return false;
+            }
+            try {
+                return connectedPrinter.gatt.connected;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Conectar a la impresora (solo la primera vez)
+        async function connectToPrinter() {
+            // Verificar compatibilidad de Web Bluetooth
+            if (!navigator.bluetooth) {
+                throw new Error('BLUETOOTH_NOT_SUPPORTED');
+            }
+
+            // Verificar si Bluetooth está disponible
+            const available = await navigator.bluetooth.getAvailability();
+            if (!available) {
+                throw new Error('BLUETOOTH_NOT_AVAILABLE');
+            }
+
+            console.log('🔍 Buscando impresora AGI-PR6000UBT-3748...');
+
+            // Solicitar dispositivo Bluetooth con opciones más amplias
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [
+                    '000018f0-0000-1000-8000-00805f9b34fb',
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+                    '0000ff00-0000-1000-8000-00805f9b34fb',
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+                ]
+            });
+
+            console.log('🔍 Conectando a:', device.name);
+            
+            // Conectar al servidor GATT
+            const server = await device.gatt.connect();
+            console.log('✅ Conectado al servidor GATT');
+
+            // Obtener todos los servicios disponibles
+            console.log('🔍 Buscando servicios de impresión...');
+            const services = await server.getPrimaryServices();
+            console.log('📋 Servicios disponibles:', services.map(s => s.uuid));
+
+            // Intentar encontrar servicio de impresión
+            let service = null;
+            const serviceUUIDs = [
+                '000018f0-0000-1000-8000-00805f9b34fb',
+                '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+                '0000ff00-0000-1000-8000-00805f9b34fb',
+                'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+            ];
+
+            for (const uuid of serviceUUIDs) {
+                try {
+                    service = await server.getPrimaryService(uuid);
+                    console.log('✅ Servicio encontrado:', uuid);
+                    break;
+                } catch (e) {
+                    console.log('⚠️ Servicio no disponible:', uuid);
+                }
+            }
+
+            // Si no encontró servicios conocidos, usar el primero disponible
+            if (!service && services.length > 0) {
+                service = services[0];
+                console.log('⚠️ Usando primer servicio disponible:', service.uuid);
+            }
+
+            if (!service) {
+                throw new Error('No se encontró ningún servicio de impresión');
+            }
+
+            console.log('✅ Servicio obtenido');
+
+            // Obtener todas las características
+            const characteristics = await service.getCharacteristics();
+            console.log('📋 Características disponibles:', characteristics.map(c => c.uuid));
+
+            // Intentar encontrar característica de escritura
+            let characteristic = null;
+            const charUUIDs = [
+                '00002af1-0000-1000-8000-00805f9b34fb',
+                '49535343-8841-43f4-a8d4-ecbe34729bb3',
+                '0000ff01-0000-1000-8000-00805f9b34fb',
+                '0000ff02-0000-1000-8000-00805f9b34fb'
+            ];
+
+            for (const uuid of charUUIDs) {
+                try {
+                    characteristic = await service.getCharacteristic(uuid);
+                    console.log('✅ Característica encontrada:', uuid);
+                    break;
+                } catch (e) {
+                    console.log('⚠️ Característica no disponible:', uuid);
+                }
+            }
+
+            // Si no encontró características conocidas, buscar una con write
+            if (!characteristic) {
+                characteristic = characteristics.find(c => 
+                    c.properties.write || c.properties.writeWithoutResponse
+                );
+                if (characteristic) {
+                    console.log('⚠️ Usando característica con escritura:', characteristic.uuid);
+                }
+            }
+
+            if (!characteristic) {
+                throw new Error('No se encontró característica de escritura en la impresora');
+            }
+
+            console.log('✅ Característica obtenida');
+
+            // Guardar referencias globales
+            connectedPrinter = device;
+            printerCharacteristic = characteristic;
+            printerServer = server;
+
+            // Escuchar desconexión
+            device.addEventListener('gattserverdisconnected', function() {
+                console.log('⚠️ Impresora desconectada');
+                connectedPrinter = null;
+                printerCharacteristic = null;
+                printerServer = null;
+            });
+
+            return { device, characteristic };
+        }
+
+        // Enviar a Bluetooth Printer usando Web Bluetooth API (AGI-PR6000UBT-3748)
+        async function sendToBluetoothPrinter() {
+            try {
+                let device, characteristic;
+
+                // Verificar si ya está conectada
+                const isConnected = await isPrinterConnected();
+                
+                if (isConnected) {
+                    console.log('✅ Usando impresora ya conectada:', connectedPrinter.name);
+                    device = connectedPrinter;
+                    characteristic = printerCharacteristic;
+                } else {
+                    // Primera vez o reconexión necesaria
+                    console.log('🔌 Conectando a impresora...');
+                    try {
+                        const connection = await connectToPrinter();
+                        device = connection.device;
+                        characteristic = connection.characteristic;
+                        alert('✅ Impresora conectada\n\n🖨️ ' + device.name + '\n\n📝 Próximas impresiones serán automáticas');
+                    } catch (connectError) {
+                        if (connectError.message === 'BLUETOOTH_NOT_SUPPORTED') {
+                            alert('❌ SERVICIO DE IMPRESORA NO HABILITADO\n\n' +
+                                  '⚠️ Tu navegador no soporta Web Bluetooth.\n\n' +
+                                  '✅ SOLUCIONES:\n' +
+                                  '1. Usa Chrome, Edge u Opera\n' +
+                                  '2. Asegúrate de estar en localhost o HTTPS\n' +
+                                  '3. Alternativa: "Copiar al Portapapeles"\n\n' +
+                                  '📱 Navegador actual: ' + (navigator.userAgent.includes('Chrome') ? 'Chrome ✓' : 'No compatible ✗'));
+                            return;
+                        } else if (connectError.message === 'BLUETOOTH_NOT_AVAILABLE') {
+                            alert('❌ BLUETOOTH NO DISPONIBLE\n\n' +
+                                  '⚠️ El Bluetooth no está activo en tu dispositivo.\n\n' +
+                                  '✅ SOLUCIONES:\n' +
+                                  '1. Activa Bluetooth en tu PC/dispositivo\n' +
+                                  '2. Verifica permisos de Bluetooth en Windows\n' +
+                                  '3. Usa "Copiar al Portapapeles" como alternativa');
+                            return;
+                        }
+                        throw connectError;
+                    }
+                }
+
+                // Generar comandos ESC/POS para impresora térmica
+                const escPos = generateESCPOS(currentReceipt.payment, currentReceipt.studentName);
+
+                // Enviar datos en fragmentos (reducir tamaño de chunk para mejor compatibilidad)
+                console.log('📤 Enviando recibo a impresora...');
+                console.log('📊 Total de datos: ' + escPos.length + ' bytes');
+                const chunkSize = 200; // Chunks más pequeños para asegurar transmisión completa
+                let sentBytes = 0;
+                
+                for (let i = 0; i < escPos.length; i += chunkSize) {
+                    const chunk = escPos.slice(i, i + chunkSize);
+                    
+                    // Usar writeWithoutResponse si está disponible, sino write
+                    if (characteristic.properties.writeWithoutResponse) {
+                        await characteristic.writeValueWithoutResponse(chunk);
+                    } else {
+                        await characteristic.writeValue(chunk);
+                    }
+                    
+                    sentBytes += chunk.length;
+                    const progress = Math.round(sentBytes/escPos.length*100);
+                    console.log(`📤 Enviado: ${sentBytes}/${escPos.length} bytes (${progress}%)`);
+                    
+                    // Delay más largo para asegurar que la impresora procese cada chunk
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+
+                // Delay final MUY LARGO para asegurar que toda la impresión se complete
+                console.log('⏳ Esperando finalización de impresión completa...');
+                console.log('⏳ Esto puede tomar varios segundos...');
+                await new Promise(resolve => setTimeout(resolve, 4000)); // 4 segundos adicionales
+
+                console.log('✅ Recibo completamente enviado e impreso');
+                alert('✅ IMPRESIÓN EXITOSA\n\n' +
+                      '📝 Recibo enviado correctamente\n' +
+                      '🖨️ Impresora: ' + device.name + '\n' +
+                      '📊 Bytes enviados: ' + sentBytes + '\n\n' +
+                      '⏳ La impresora está procesando...');
+                closePrintModal();
+
+            } catch (error) {
+                console.error('❌ Error completo:', error);
+                console.error('❌ Nombre del error:', error.name);
+                console.error('❌ Mensaje:', error.message);
+                
+                let errorMsg = '❌ ERROR DE IMPRESORA\n\n';
+                
+                if (error.name === 'NotFoundError') {
+                    errorMsg += '⚠️ No se encontró la impresora.\n\n' +
+                               '✅ VERIFICA:\n' +
+                               '• Impresora encendida\n' +
+                               '• Bluetooth activo\n' +
+                               '• Modo emparejamiento';
+                } else if (error.name === 'SecurityError') {
+                    errorMsg += '⚠️ Error de seguridad.\n\n' +
+                               '✅ SOLUCIÓN:\n' +
+                               '• Usa HTTPS o localhost\n' +
+                               '• Servidor: http://localhost:8000\n' +
+                               '• Alternativa: "Copiar al Portapapeles"';
+                } else if (error.name === 'NetworkError') {
+                    errorMsg += '⚠️ Error de conexión.\n\n' +
+                               '✅ SOLUCIÓN:\n' +
+                               '• Reintenta la conexión\n' +
+                               '• Reinicia la impresora\n' +
+                               '• Usa "Copiar al Portapapeles"';
+                } else if (error.message.includes('User cancelled')) {
+                    // Usuario canceló, no mostrar error
+                    return;
+                } else {
+                    errorMsg += 'Detalles: ' + error.message + '\n\n' +
+                               '✅ ALTERNATIVAS:\n' +
+                               '1. Usa "Copiar al Portapapeles"\n' +
+                               '2. Reinicia la impresora\n' +
+                               '3. Verifica configuración Bluetooth\n\n' +
+                               '🔧 Abre la Consola (F12) para más detalles';
+                }
+                
+                alert(errorMsg);
+            }
+        }
+
+        // Generar comandos ESC/POS para AGI-PR6000UBT-3748 (58mm térmica)
+        function generateESCPOS(payment, studentName) {
+            const ESC = 0x1B;
+            const GS = 0x1D;
+            const LF = 0x0A;
+            const encoder = new TextEncoder();
+            const commands = [];
+
+            // Función auxiliar para agregar comandos
+            function add(arr) {
+                if (Array.isArray(arr)) {
+                    commands.push(...arr);
+                } else {
+                    commands.push(...Array.from(arr));
+                }
+            }
+
+            // Inicializar impresora
+            add([ESC, 0x40]); // ESC @ - Reset
+
+            // Configurar página de códigos para caracteres especiales
+            add([ESC, 0x74, 0x10]); // ESC t 16 - Página de código WPC1252
+
+            // Centrar texto
+            add([ESC, 0x61, 0x01]); // ESC a 1 - Centrar
+
+            // Encabezado: VOLLEYATOM (grande)
+            add([ESC, 0x45, 0x01]); // ESC E 1 - Negrita ON
+            add([GS, 0x21, 0x11]); // GS ! 17 - Doble ancho y alto
+            add(encoder.encode('VOLLEYATOM'));
+            add([LF]);
+
+            // Subtítulo: Academia (tamaño normal)
+            add([GS, 0x21, 0x00]); // GS ! 0 - Tamaño normal
+            add([ESC, 0x45, 0x00]); // ESC E 0 - Negrita OFF
+            add(encoder.encode('Academia de Voleibol'));
+            add([LF]);
+
+            // Línea separadora
+            add(encoder.encode('------------------'));
+            add([LF, LF]);
+
+            // Título recibo
+            add([GS, 0x21, 0x10]); // Doble alto
+            add([ESC, 0x45, 0x01]); // Negrita ON
+            add(encoder.encode('** RECIBO **'));
+            add([ESC, 0x45, 0x00]); // Negrita OFF
+            add([LF, LF]);
+
+            // Alinear a la izquierda para los datos
+            add([ESC, 0x61, 0x00]); // ESC a 0 - Alinear izquierda
+
+            // Fecha y hora (tamaño normal)
+            add([GS, 0x21, 0x00]); // Tamaño normal
+            const date = new Date(payment.date);
+            const dateStr = date.toLocaleDateString('es-DO');
+            const timeStr = date.toLocaleTimeString('es-DO', {hour: '2-digit', minute: '2-digit'});
+            
+            add(encoder.encode('Fecha: ' + dateStr));
+            add([LF]);
+            add(encoder.encode('Hora:  ' + timeStr));
+            add([LF]);
+            add(encoder.encode('Recibo: #' + payment.id));
+            add([LF]);
+            add(encoder.encode('------------------'));
+            add([LF, LF]);
+
+            // Datos del estudiante (tamaño normal con negrita)
+            add(encoder.encode('Estudiante:'));
+            add([LF]);
+            add([ESC, 0x45, 0x01]); // Negrita
+            add(encoder.encode(studentName));
+            add([ESC, 0x45, 0x00]);
+            add([LF, LF]);
+
+            add(encoder.encode('Concepto:'));
+            add([LF]);
+            add([ESC, 0x45, 0x01]); // Negrita
+            add(encoder.encode(payment.type.toUpperCase()));
+            add([ESC, 0x45, 0x00]);
+            add([LF, LF]);
+
+            add(encoder.encode('Metodo:'));
+            add([LF]);
+            add([ESC, 0x45, 0x01]); // Negrita
+            add(encoder.encode(payment.method.toUpperCase()));
+            add([ESC, 0x45, 0x00]);
+            add([LF, LF]);
+
+            // Línea separadora
+            add(encoder.encode('------------------'));
+            add([LF, LF]);
+
+            // Monto (centrado y grande)
+            add([ESC, 0x61, 0x01]); // Centrar
+            add([GS, 0x21, 0x10]); // Doble alto
+            add([ESC, 0x45, 0x01]); // Negrita ON
+            add(encoder.encode('MONTO PAGADO'));
+            add([LF, LF]);
+            
+            add([GS, 0x21, 0x22]); // Triple tamaño para el monto
+            add(encoder.encode('RD$' + payment.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2})));
+            add([LF, LF]);
+
+            // Volver a tamaño normal
+            add([GS, 0x21, 0x00]);
+            add([ESC, 0x45, 0x00]);
+            add([ESC, 0x61, 0x00]); // Izquierda
+
+            // Línea separadora
+            add(encoder.encode('------------------'));
+            add([LF, LF, LF]);
+
+            // Firma (tamaño normal)
+            add(encoder.encode('Firma:'));
+            add([LF, LF, LF, LF]);
+            add(encoder.encode('_____________'));
+            add([LF, LF, LF, LF]);
+
+            // Mensaje final (centrado, tamaño normal)
+            add([ESC, 0x61, 0x01]); // Centrar
+            add([GS, 0x21, 0x10]); // Doble alto
+            add(encoder.encode('Gracias!'));
+            add([LF, LF]);
+            add([GS, 0x21, 0x00]); // Tamaño normal
+            add(encoder.encode('------------------'));
+            add([LF, LF, LF]);
+            
+            // Espacios finales abundantes para asegurar que todo salga
+            add([LF, LF, LF, LF, LF, LF, LF, LF, LF, LF]);
+            add([LF, LF, LF, LF, LF]); // 15 líneas totales de margen
+
+            // NO cortar papel automáticamente - dejar que el usuario lo haga
+            // Esto evita que se corte antes de que todo se imprima
+            // add([GS, 0x56, 0x00]); // Corte deshabilitado
+
+            return new Uint8Array(commands);
+        }
+
+        // Copiar recibo al portapapeles
+        function copyReceiptToClipboard() {
+            var textarea = document.createElement('textarea');
+            textarea.value = currentReceipt.text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('✅ Recibo copiado al portapapeles\n\n📱 Instrucciones:\n1. Abre Bluetooth Printer\n2. Pega el texto (Ctrl+V o mantén presionado)\n3. Conecta a tu impresora\n4. Presiona Imprimir');
+                closePrintModal();
+            } catch (err) {
+                alert('❌ No se pudo copiar automáticamente');
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        // Imprimir desde el navegador
+        function printFromBrowser() {
+            var printWindow = window.open('', '', 'width=300,height=600');
+            printWindow.document.write('<html><head><title>Recibo - ' + currentReceipt.studentName + '</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('body { font-family: "Courier New", monospace; font-size: 12px; margin: 20px; }');
+            printWindow.document.write('pre { white-space: pre-wrap; }');
+            printWindow.document.write('</style></head><body>');
+            printWindow.document.write('<pre>' + currentReceipt.text + '</pre>');
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+            
+            setTimeout(function() {
+                printWindow.print();
+            }, 250);
+            
+            closePrintModal();
+        }
+
+        // Generar recibo en texto para impresora térmica
+        function generateTextReceipt(payment, studentName) {
+            var date = new Date(payment.date);
+            var dateStr = date.toLocaleDateString('es-DO');
+            var timeStr = date.toLocaleTimeString('es-DO', {hour: '2-digit', minute: '2-digit'});
+            
+            var text = '';
+            text += '--------------------------------\n';
+            text += '      VOLLEYATOM\n';
+            text += '  Academia de Voleibol\n';
+            text += '--------------------------------\n';
+            text += '\n';
+            text += '    ** RECIBO DE PAGO **\n';
+            text += '\n';
+            text += 'Fecha: ' + dateStr + '\n';
+            text += 'Hora:  ' + timeStr + '\n';
+            text += 'Recibo: #' + payment.id + '\n';
+            text += '--------------------------------\n';
+            text += '\n';
+            text += 'Estudiante:\n';
+            text += '  ' + studentName + '\n';
+            text += '\n';
+            text += 'Concepto:\n';
+            text += '  ' + payment.type.toUpperCase() + '\n';
+            text += '\n';
+            text += 'Metodo de Pago:\n';
+            text += '  ' + payment.method.toUpperCase() + '\n';
+            text += '\n';
+            text += '--------------------------------\n';
+            text += '\n';
+            text += '     MONTO PAGADO\n';
+            text += '\n';
+            text += '       RD$ ' + payment.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '\n';
+            text += '\n';
+            text += '--------------------------------\n';
+            text += '\n';
+            text += 'Firma:\n';
+            text += '\n';
+            text += '_________________________\n';
+            text += '\n';
+            text += '   Gracias por su pago\n';
+            text += '\n';
+            text += '--------------------------------\n';
+            text += '\n';
+            
+            return text;
+        }
+
+        // Auto-iniciar aplicación
+        currentUser = 'admin';
+        document.getElementById('userDisplay').textContent = '👤 Admin';
+        showView('students');
+
+        // Renderizar lista de asistencia
+        function renderAttendance() {
+            var today = new Date().toLocaleDateString('es-DO');
+            document.getElementById('todayDate').textContent = today;
+            
+            var list1 = document.getElementById('attendanceList1');
+            var list2 = document.getElementById('attendanceList2');
+            list1.innerHTML = '';
+            list2.innerHTML = '';
+            
+            if (students.length === 0) {
+                list1.innerHTML = '<div class="empty-state">No hay estudiantes registrados</div>';
+                return;
+            }
+            
+            var todayStr = new Date().toISOString().split('T')[0];
+            
+            // Separar estudiantes por horario
+            var students1 = students.filter(function(s) { 
+                return s.schedule === 'Sábado 2:00 PM - 4:00 PM'; 
+            });
+            var students2 = students.filter(function(s) { 
+                return s.schedule === 'Sábado 4:00 PM - 6:00 PM'; 
+            });
+            
+            // Renderizar estudiantes del horario 2-4pm
+            if (students1.length === 0) {
+                list1.innerHTML = '<div class="empty-state">No hay estudiantes en este horario</div>';
+            } else {
+                students1.forEach(function(s) {
+                    renderAttendanceItem(s, todayStr, list1);
+                });
+            }
+            
+            // Renderizar estudiantes del horario 4-6pm
+            if (students2.length === 0) {
+                list2.innerHTML = '<div class="empty-state">No hay estudiantes en este horario</div>';
+            } else {
+                students2.forEach(function(s) {
+                    renderAttendanceItem(s, todayStr, list2);
+                });
+            }
+        }
+        
+        // Función auxiliar para renderizar un item de asistencia
+        function renderAttendanceItem(s, todayStr, list) {
+            var todayAttendance = attendance.find(function(a) {
+                return a.studentId === s.id && a.date === todayStr;
+            });
+            
+            var div = document.createElement('div');
+            div.className = 'item';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+            
+            var nameSpan = document.createElement('span');
+            nameSpan.innerHTML = '<strong>' + s.name + '</strong>';
+            
+            var btnContainer = document.createElement('div');
+            btnContainer.style.display = 'flex';
+            btnContainer.style.gap = '8px';
+            
+            var presentBtn = document.createElement('button');
+            presentBtn.className = todayAttendance && todayAttendance.present ? 'btn-success' : 'btn-secondary';
+            presentBtn.style.width = 'auto';
+            presentBtn.style.padding = '8px 16px';
+            presentBtn.innerHTML = '✅ Presente';
+            presentBtn.onclick = function() {
+                markAttendance(s.id, true);
+            };
+            
+            var absentBtn = document.createElement('button');
+            absentBtn.className = todayAttendance && !todayAttendance.present ? 'btn-danger' : 'btn-secondary';
+            absentBtn.style.width = 'auto';
+            absentBtn.style.padding = '8px 16px';
+            absentBtn.innerHTML = '❌ Ausente';
+            absentBtn.onclick = function() {
+                markAttendance(s.id, false);
+            };
+            
+            btnContainer.appendChild(presentBtn);
+            btnContainer.appendChild(absentBtn);
+            
+            div.appendChild(nameSpan);
+            div.appendChild(btnContainer);
+            list.appendChild(div);
+        }
+        
+        // Marcar asistencia
+        function markAttendance(studentId, present) {
+            var todayStr = new Date().toISOString().split('T')[0];
+            
+            // Buscar si ya existe registro de hoy
+            var index = attendance.findIndex(function(a) {
+                return a.studentId === studentId && a.date === todayStr;
+            });
+            
+            if (index >= 0) {
+                attendance[index].present = present;
+            } else {
+                attendance.push({
+                    studentId: studentId,
+                    date: todayStr,
+                    present: present
+                });
+            }
+            
+            saveData();
+            renderAttendance();
+        }
+        
+        // Marcar todos presentes
+        // Marcar todos presentes por horario
+        function markAllPresentBySchedule(schedule) {
+            var todayStr = new Date().toISOString().split('T')[0];
+            var studentsInSchedule = students.filter(function(s) { 
+                return s.schedule === schedule; 
+            });
+            
+            if (studentsInSchedule.length === 0) {
+                alert('⚠️ No hay estudiantes en este horario');
+                return;
+            }
+            
+            studentsInSchedule.forEach(function(s) {
+                var index = attendance.findIndex(function(a) {
+                    return a.studentId === s.id && a.date === todayStr;
+                });
+                
+                if (index >= 0) {
+                    attendance[index].present = true;
+                } else {
+                    attendance.push({
+                        studentId: s.id,
+                        date: todayStr,
+                        present: true
+                    });
+                }
+            });
+            
+            saveData();
+            renderAttendance();
+            var horario = schedule.includes('2:00') ? '2-4pm' : '4-6pm';
+            alert('✅ Todos los estudiantes del horario ' + horario + ' marcados como presentes');
+        }
+        
+        function markAllPresent() {
+            var todayStr = new Date().toISOString().split('T')[0];
+            
+            students.forEach(function(s) {
+                var index = attendance.findIndex(function(a) {
+                    return a.studentId === s.id && a.date === todayStr;
+                });
+                
+                if (index >= 0) {
+                    attendance[index].present = true;
+                } else {
+                    attendance.push({
+                        studentId: s.id,
+                        date: todayStr,
+                        present: true
+                    });
+                }
+            });
+            
+            saveData();
+            renderAttendance();
+            alert('✅ Todos marcados como presentes');
+        }
+        
+        // Mostrar reporte de asistencias
+        function showAttendanceReport() {
+            var report = '<h3>📊 Reporte de Asistencias</h3>';
+            report += '<div style="background:#f9f9f9;padding:15px;border-radius:8px;margin-top:10px;">';
+            
+            if (students.length === 0) {
+                report += '<p>No hay estudiantes registrados</p>';
+            } else {
+                students.forEach(function(s) {
+                    var studentAttendance = attendance.filter(function(a) { return a.studentId === s.id; });
+                    var presentDays = studentAttendance.filter(function(a) { return a.present; }).length;
+                    var absentDays = studentAttendance.filter(function(a) { return !a.present; }).length;
+                    var percent = studentAttendance.length > 0 ? Math.round((presentDays / studentAttendance.length) * 100) : 0;
+                    var color = percent >= 80 ? '#10b981' : percent >= 60 ? '#f59e0b' : '#ef4444';
+                    
+                    report += '<div class="item" style="margin-bottom:10px;">';
+                    report += '<strong>' + s.name + '</strong><br>';
+                    report += 'Días presentes: ' + presentDays + '<br>';
+                    report += 'Días ausentes: ' + absentDays + '<br>';
+                    report += '<span style="color: ' + color + '; font-weight: bold; font-size: 18px;">' + percent + '%</span> de asistencia';
+                    report += '</div>';
+                });
+            }
+            
+            report += '</div>';
+            document.getElementById('attendanceReport').innerHTML = report;
+        }
+        
+
+
+        // Actualizar información de sincronización
+        function updateSyncInfo() {
+            document.getElementById('syncStudents').textContent = students.length;
+            document.getElementById('syncPayments').textContent = payments.length;
+            document.getElementById('syncAttendance').textContent = attendance.length;
+            
+            var lastExport = localStorage.getItem('volleyatom_last_export');
+            if (lastExport) {
+                var date = new Date(lastExport);
+                document.getElementById('lastExport').textContent = date.toLocaleString('es-DO');
+            } else {
+                document.getElementById('lastExport').textContent = 'Nunca';
+            }
+        }
+        
+        // Exportar datos a archivo JSON
+        function exportData() {
+            var data = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                students: students,
+                payments: payments,
+                attendance: attendance
+            };
+            
+            var dataStr = JSON.stringify(data, null, 2);
+            var blob = new Blob([dataStr], {type: 'application/json'});
+            var url = URL.createObjectURL(blob);
+            
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'volleyatom_datos_' + new Date().toISOString().split('T')[0] + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            localStorage.setItem('volleyatom_last_export', new Date().toISOString());
+            updateSyncInfo();
+            
+            document.getElementById('syncStatus').innerHTML = '<div class="info">✅ Datos exportados exitosamente. Archivo descargado.</div>';
+            setTimeout(function() {
+                document.getElementById('syncStatus').innerHTML = '';
+            }, 5000);
+        }
+        
+        // Compartir datos usando Web Share API
+        function shareData() {
+            var data = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                students: students,
+                payments: payments,
+                attendance: attendance
+            };
+            
+            var dataStr = JSON.stringify(data);
+            var fileName = 'volleyatom_datos_' + new Date().toISOString().split('T')[0] + '.json';
+            
+            if (navigator.share) {
+                // Crear archivo para compartir
+                var blob = new Blob([dataStr], {type: 'application/json'});
+                var file = new File([blob], fileName, {type: 'application/json'});
+                
+                if (navigator.canShare && navigator.canShare({files: [file]})) {
+                    navigator.share({
+                        title: 'Datos VolleyAtom',
+                        text: 'Archivo de datos de VolleyAtom - ' + students.length + ' estudiantes',
+                        files: [file]
+                    }).then(function() {
+                        localStorage.setItem('volleyatom_last_export', new Date().toISOString());
+                        updateSyncInfo();
+                        document.getElementById('syncStatus').innerHTML = '<div class="info">✅ Datos compartidos exitosamente.</div>';
+                        setTimeout(function() {
+                            document.getElementById('syncStatus').innerHTML = '';
+                        }, 5000);
+                    }).catch(function(error) {
+                        if (error.name !== 'AbortError') {
+                            console.error('Error al compartir:', error);
+                            shareDataAsText(dataStr, fileName);
+                        }
+                    });
+                } else {
+                    shareDataAsText(dataStr, fileName);
+                }
+            } else {
+                shareDataAsText(dataStr, fileName);
+            }
+        }
+        
+        // Compartir datos como texto si no se pueden compartir archivos
+        function shareDataAsText(dataStr, fileName) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Datos VolleyAtom',
+                    text: 'Copia estos datos y guárdalos en un archivo .json:\n\n' + dataStr
+                }).catch(function(error) {
+                    if (error.name !== 'AbortError') {
+                        fallbackCopyData(dataStr);
+                    }
+                });
+            } else {
+                fallbackCopyData(dataStr);
+            }
+        }
+        
+        // Copiar datos al portapapeles como respaldo
+        function fallbackCopyData(dataStr) {
+            var textarea = document.createElement('textarea');
+            textarea.value = dataStr;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                document.getElementById('syncStatus').innerHTML = '<div class="info">📋 Datos copiados al portapapeles. Pégalos en un archivo .json y compártelo.</div>';
+            } catch (err) {
+                document.getElementById('syncStatus').innerHTML = '<div class="info" style="background:#fef3c7;border-left-color:#f59e0b;">⚠️ Usa el botón "Descargar Datos" en su lugar.</div>';
+            }
+            
+            document.body.removeChild(textarea);
+            
+            setTimeout(function() {
+                document.getElementById('syncStatus').innerHTML = '';
+            }, 5000);
+        }
+        
+        // Importar datos desde archivo JSON
+        function importData() {
+            var file = document.getElementById('importFile').files[0];
+            if (!file) return;
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var importedData = JSON.parse(e.target.result);
+                    
+                    if (!importedData.students || !importedData.payments || !importedData.attendance) {
+                        throw new Error('Formato de archivo inválido');
+                    }
+                    
+                    // Preguntar si desea fusionar o reemplazar
+                    var action = confirm('¿Cómo deseas importar los datos?\n\nOK = FUSIONAR (combinar con datos existentes)\nCANCELAR = REEMPLAZAR (borrar datos actuales)');
+                    
+                    if (action) {
+                        // Fusionar datos
+                        mergeData(importedData);
+                    } else {
+                        // Reemplazar datos
+                        if (confirm('⚠️ ¿Estás seguro? Esto ELIMINARÁ todos los datos actuales.')) {
+                            students = importedData.students;
+                            payments = importedData.payments;
+                            attendance = importedData.attendance;
+                            saveData();
+                            
+                            document.getElementById('syncStatus').innerHTML = '<div class="info">✅ Datos reemplazados exitosamente. ' + students.length + ' estudiantes importados.</div>';
+                        }
+                    }
+                    
+                    updateSyncInfo();
+                    document.getElementById('importFile').value = '';
+                    
+                    setTimeout(function() {
+                        document.getElementById('syncStatus').innerHTML = '';
+                    }, 5000);
+                    
+                } catch (error) {
+                    console.error('Error al importar:', error);
+                    document.getElementById('syncStatus').innerHTML = '<div class="info" style="background:#fecaca;border-left-color:#ef4444;">❌ Error: Archivo inválido o corrupto.</div>';
+                    setTimeout(function() {
+                        document.getElementById('syncStatus').innerHTML = '';
+                    }, 5000);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Fusionar datos importados con existentes
+        function mergeData(importedData) {
+            var newStudents = 0;
+            var newPayments = 0;
+            var newAttendance = 0;
+            
+            // Fusionar estudiantes (evitar duplicados por nombre)
+            importedData.students.forEach(function(s) {
+                var exists = students.find(function(existing) {
+                    return existing.name.toLowerCase() === s.name.toLowerCase();
+                });
+                
+                if (!exists) {
+                    // Generar nuevo ID para evitar conflictos
+                    var newStudent = Object.assign({}, s);
+                    var oldId = newStudent.id;
+                    newStudent.id = Date.now() + Math.random();
+                    students.push(newStudent);
+                    newStudents++;
+                    
+                    // Actualizar referencias en pagos y asistencias
+                    importedData.payments.forEach(function(p) {
+                        if (p.studentId === oldId) {
+                            p.studentId = newStudent.id;
+                        }
+                    });
+                    
+                    importedData.attendance.forEach(function(a) {
+                        if (a.studentId === oldId) {
+                            a.studentId = newStudent.id;
+                        }
+                    });
+                }
+            });
+            
+            // Fusionar pagos (evitar duplicados exactos)
+            importedData.payments.forEach(function(p) {
+                var exists = payments.find(function(existing) {
+                    return existing.studentId === p.studentId && 
+                           existing.date === p.date && 
+                           existing.amount === p.amount;
+                });
+                
+                if (!exists) {
+                    payments.push(Object.assign({}, p, {id: Date.now() + Math.random()}));
+                    newPayments++;
+                }
+            });
+            
+            // Fusionar asistencias (evitar duplicados por fecha y estudiante)
+            importedData.attendance.forEach(function(a) {
+                var exists = attendance.find(function(existing) {
+                    return existing.studentId === a.studentId && existing.date === a.date;
+                });
+                
+                if (!exists) {
+                    attendance.push(Object.assign({}, a));
+                    newAttendance++;
+                }
+            });
+            
+            saveData();
+            
+            document.getElementById('syncStatus').innerHTML = 
+                '<div class="info">✅ Datos fusionados exitosamente.<br>' +
+                'Nuevos estudiantes: ' + newStudents + '<br>' +
+                'Nuevos pagos: ' + newPayments + '<br>' +
+                'Nuevas asistencias: ' + newAttendance + '</div>';
+        }
+
+        // Inicializar
+        loadData();
+        
+        // Registrar Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Detectar si la app puede ser instalada
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('💡 La aplicación puede ser instalada');
+        });
+        
+        console.log('VolleyAtom cargado');
+    </script>
+</body>
+</html>
