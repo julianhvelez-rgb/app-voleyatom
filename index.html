@@ -401,6 +401,7 @@
         <input type="password" id="pass" placeholder="Contraseña">
         <button id="btnLogin" onclick="login()">🔐 Entrar</button>
         <div class="info" style="margin-top: 15px;">Usuario predeterminado: <strong>admin</strong> / Contraseña: <strong>admin</strong></div>
+        <button onclick="resetApp()" style="background: #dc3545; margin-top: 10px; font-size: 14px;">🔄 Restablecer Datos (si no puedes entrar)</button>
     </div>
 
     <div id="mainSection" class="hidden">
@@ -834,6 +835,22 @@
             
             document.getElementById('toggleSyncBtn').textContent = 
                 cloudSyncEnabled ? '⏸️ Desactivar Sincronización' : '▶️ Activar Sincronización';
+        }
+
+        // Restablecer aplicación a valores predeterminados
+        function resetApp() {
+            if (confirm('⚠️ ADVERTENCIA: Esto borrará TODOS tus datos (estudiantes, pagos, asistencias y credenciales).\n\n¿Estás seguro de continuar?')) {
+                if (confirm('🔴 ÚLTIMA CONFIRMACIÓN: Se perderán todos los datos. ¿Continuar?')) {
+                    // Borrar todo el localStorage
+                    localStorage.clear();
+                    
+                    // Mostrar mensaje y recargar
+                    alert('✅ Datos restablecidos. La aplicación se reiniciará.\n\nUsa: admin / admin para entrar.');
+                    
+                    // Recargar la página
+                    window.location.reload(true);
+                }
+            }
         }
 
         // Login
@@ -2231,43 +2248,20 @@
             var timeStr = date.toLocaleTimeString('es-DO', {hour: '2-digit', minute: '2-digit'});
             
             var text = '';
-            text += '--------------------------------\n';
-            text += '      VOLLEYATOM\n';
-            text += '  Academia de Voleibol\n';
-            text += '--------------------------------\n';
-            text += '\n';
-            text += '    ** RECIBO DE PAGO **\n';
-            text += '\n';
-            text += 'Fecha: ' + dateStr + '\n';
-            text += 'Hora:  ' + timeStr + '\n';
-            text += 'Recibo: #' + payment.id + '\n';
-            text += '--------------------------------\n';
-            text += '\n';
-            text += 'Estudiante:\n';
-            text += '  ' + studentName + '\n';
-            text += '\n';
-            text += 'Concepto:\n';
-            text += '  ' + payment.type.toUpperCase() + '\n';
-            text += '\n';
-            text += 'Metodo de Pago:\n';
-            text += '  ' + payment.method.toUpperCase() + '\n';
-            text += '\n';
-            text += '--------------------------------\n';
-            text += '\n';
-            text += '     MONTO PAGADO\n';
-            text += '\n';
-            text += '       RD$ ' + payment.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '\n';
-            text += '\n';
-            text += '--------------------------------\n';
-            text += '\n';
-            text += 'Firma:\n';
-            text += '\n';
-            text += '_________________________\n';
-            text += '\n';
-            text += '   Gracias por su pago\n';
-            text += '\n';
-            text += '--------------------------------\n';
-            text += '\n';
+            text += '------------------------\n';
+            text += '     VOLLEYATOM\n';
+            text += '   RECIBO #' + payment.id + '\n';
+            text += dateStr + ' ' + timeStr + '\n';
+            text += '------------------------\n';
+            text += studentName + '\n';
+            text += payment.type.toUpperCase() + '\n';
+            text += payment.method.toUpperCase() + '\n';
+            text += '------------------------\n';
+            text += '  RD$ ' + payment.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '\n';
+            text += '------------------------\n';
+            text += 'Firma:__________________\n';
+            text += '  Gracias por su pago\n';
+            text += '------------------------\n';
             
             return text;
         }
