@@ -3031,6 +3031,15 @@
                 'Nuevas asistencias: ' + newAttendance + '</div>';
         }
 
+        // Verificar si se debe resetear la app desde URL
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reset') === 'true') {
+            localStorage.clear();
+            alert('✅ Datos restablecidos correctamente.\n\nAhora puedes ingresar con:\nUsuario: admin\nContraseña: admin');
+            // Redirigir sin el parámetro reset
+            window.location.href = window.location.pathname;
+        }
+
         // Inicializar
         loadData();
         
