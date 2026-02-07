@@ -841,14 +841,23 @@
         function resetApp() {
             if (confirm('⚠️ ADVERTENCIA: Esto borrará TODOS tus datos (estudiantes, pagos, asistencias y credenciales).\n\n¿Estás seguro de continuar?')) {
                 if (confirm('🔴 ÚLTIMA CONFIRMACIÓN: Se perderán todos los datos. ¿Continuar?')) {
-                    // Borrar todo el localStorage
-                    localStorage.clear();
+                    // Borrar absolutamente todo el localStorage
+                    try {
+                        localStorage.clear();
+                        // También intentar borrar keys específicas por si acaso
+                        localStorage.removeItem('volleyatom_data');
+                        localStorage.removeItem('volleyatom_users');
+                        // Limpiar sessionStorage también
+                        sessionStorage.clear();
+                    } catch(e) {
+                        console.error('Error limpiando storage:', e);
+                    }
                     
-                    // Mostrar mensaje y recargar
+                    // Mostrar mensaje y recargar forzadamente
                     alert('✅ Datos restablecidos. La aplicación se reiniciará.\n\nUsa: admin / admin para entrar.');
                     
-                    // Recargar la página
-                    window.location.reload(true);
+                    // Recargar la página forzadamente (bypass cache)
+                    window.location.href = window.location.pathname + '?nocache=' + Date.now();
                 }
             }
         }
@@ -907,7 +916,13 @@
                     showView('students');
                 }
             } else {
-                alert('Usuario o contraseña incorrectos');
+                // Mostrar información de diagnóstico
+                var usersList = users.map(function(u) { return u.user; }).join(', ');
+                alert('❌ Usuario o contraseña incorrectos\n\n' + 
+                      '📋 Usuarios registrados: ' + usersList + '\n\n' +
+                      '💡 Si no puedes entrar:\n' +
+                      '1. Usa el botón rojo "Restablecer Datos"\n' +
+                      '2. O abre: ?reset=true al final de la URL');
             }
         }
 
