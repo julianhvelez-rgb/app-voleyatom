@@ -344,19 +344,66 @@
         #syncIndicator.inactive {
             background: #ef4444;
         }
+        
+        /* Estilos para fotos de estudiantes */
+        .student-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .student-photo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            margin: 15px auto;
+            display: none;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+        .photo-upload-container {
+            text-align: center;
+            margin: 15px 0;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+        }
+        .photo-upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .photo-upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        input[type="file"] {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div id="loginSection" class="card hidden">
+    <div id="loginSection" class="card">
         <h1>⚡ VolleyAtom</h1>
         <h2>Iniciar sesión</h2>
-        <input type="text" id="user" value="admin" placeholder="Usuario">
-        <input type="password" id="pass" value="admin" placeholder="Contraseña">
-        <button id="btnLogin" onclick="login()">Entrar</button>
-        <div class="info">Usuario: <strong>admin</strong> / Contraseña: <strong>admin</strong></div>
+        <div class="info" style="margin-bottom: 20px;">🔒 Tu información está protegida</div>
+        <input type="text" id="user" placeholder="Usuario">
+        <input type="password" id="pass" placeholder="Contraseña">
+        <button id="btnLogin" onclick="login()">🔐 Entrar</button>
+        <div class="info" style="margin-top: 15px;">Usuario predeterminado: <strong>admin</strong> / Contraseña: <strong>admin</strong></div>
     </div>
 
-    <div id="mainSection">
+    <div id="mainSection" class="hidden">
         <div class="card">
             <h1>⚡ VolleyAtom</h1>
             <div style="text-align: center; margin-bottom: 20px;">
@@ -369,11 +416,18 @@
                 <button onclick="showView('attendance')">📅 Asistencias</button>
                 <button onclick="showView('reports')">📊 Reportes</button>
                 <button onclick="showView('sync')">🔄 Sincronizar</button>
+                <button onclick="showView('settings')">⚙️ Configuración</button>
                 <button class="btn-danger" onclick="logout()">🚪 Salir</button>
             </div>
 
             <div id="studentsView" class="hidden">
                 <h3>✏️ Agregar Estudiante</h3>
+                <div class="photo-upload-container">
+                    <label class="photo-upload-label" for="sPhoto">📷 Seleccionar Foto</label>
+                    <input type="file" id="sPhoto" accept="image/*" onchange="previewPhoto('sPhotoPreview', this)">
+                    <img id="sPhotoPreview" class="student-photo-preview">
+                    <div style="margin-top: 10px; color: #718096; font-size: 13px;">Opcional - Tamaño recomendado: 300x300px</div>
+                </div>
                 <input type="text" id="sName" placeholder="Nombre completo del estudiante">
                 <input type="date" id="sAge" placeholder="Fecha de nacimiento">
                 <input type="text" id="sParentName" placeholder="Nombre del padre/madre/tutor">
@@ -488,6 +542,37 @@
                     <p>Pagos: <span id="syncPayments">0</span></p>
                     <p>Asistencias: <span id="syncAttendance">0</span></p>
                     <p style="margin-top:10px;"><strong>🗓️ Última exportación:</strong> <span id="lastExport">Nunca</span></p>
+                </div>
+            </div>
+
+            <div id="settingsView" class="hidden">
+                <h3>⚙️ Configuración de Seguridad</h3>
+                <div class="info">
+                    🔐 Cambia tu usuario y contraseña para proteger tu información
+                </div>
+                
+                <h3 style="margin-top: 25px;">👤 Usuario Actual</h3>
+                <div style="background:#f0f9ff;padding:15px;border-radius:10px;font-size:16px;border-left:4px solid #3b82f6;margin-bottom:25px;">
+                    <strong id="currentUsername">admin</strong>
+                </div>
+                
+                <h3>🔑 Cambiar Credenciales</h3>
+                <div style="background:#fef3c7;padding:15px;border-radius:10px;font-size:13px;border-left:4px solid #f59e0b;margin-bottom:20px;">
+                    ⚠️ <strong>Importante:</strong> Anota tus nuevas credenciales, no hay forma de recuperarlas si las olvidas.
+                </div>
+                
+                <input type="password" id="currentPassword" placeholder="Contraseña actual" style="margin-top: 10px;">
+                <input type="text" id="newUsername" placeholder="Nuevo usuario (opcional)">
+                <input type="password" id="newPassword" placeholder="Nueva contraseña">
+                <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
+                
+                <button class="btn-success" onclick="changeCredentials()" style="margin-top: 15px;">💾 Guardar Cambios</button>
+                
+                <h3 style="margin-top: 30px;">📱 Información de la Sesión</h3>
+                <div style="background:#f9f9f9;padding:15px;border-radius:10px;font-size:14px;">
+                    <p><strong>👤 Usuario activo:</strong> <span id="activeUser">-</span></p>
+                    <p><strong>💾 Datos guardados:</strong> Localmente en este dispositivo</p>
+                    <p><strong>🔒 Seguridad:</strong> Protegido con contraseña</p>
                 </div>
             </div>
         </div>
@@ -823,6 +908,7 @@
             document.getElementById('reportsView').classList.add('hidden');
             document.getElementById('attendanceView').classList.add('hidden');
             document.getElementById('syncView').classList.add('hidden');
+            document.getElementById('settingsView').classList.add('hidden');
             
             if (view === 'students') {
                 document.getElementById('studentsView').classList.remove('hidden');
@@ -840,6 +926,126 @@
             } else if (view === 'sync') {
                 document.getElementById('syncView').classList.remove('hidden');
                 updateSyncInfo();
+            } else if (view === 'settings') {
+                document.getElementById('settingsView').classList.remove('hidden');
+                updateSettingsView();
+            }
+        }
+
+        // Actualizar vista de configuración
+        function updateSettingsView() {
+            var currentUserEl = document.getElementById('currentUsername');
+            var activeUserEl = document.getElementById('activeUser');
+            if (currentUserEl && currentUser) {
+                currentUserEl.textContent = currentUser;
+            }
+            if (activeUserEl && currentUser) {
+                activeUserEl.textContent = currentUser;
+            }
+            // Limpiar campos
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        // Cambiar credenciales
+        function changeCredentials() {
+            var currentPassword = document.getElementById('currentPassword').value;
+            var newUsername = document.getElementById('newUsername').value.trim();
+            var newPassword = document.getElementById('newPassword').value;
+            var confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validar contraseña actual
+            if (!currentPassword) {
+                alert('❌ Debes ingresar tu contraseña actual');
+                return;
+            }
+
+            // Buscar usuario actual
+            var currentUserData = users.find(function(u) {
+                return u.user === currentUser && u.pass === currentPassword;
+            });
+
+            if (!currentUserData) {
+                alert('❌ Contraseña actual incorrecta');
+                return;
+            }
+
+            // Validar que al menos uno de los campos esté lleno
+            if (!newUsername && !newPassword) {
+                alert('⚠️ Debes ingresar al menos un nuevo usuario o una nueva contraseña');
+                return;
+            }
+
+            // Si se va a cambiar la contraseña, validar confirmación
+            if (newPassword) {
+                if (newPassword.length < 4) {
+                    alert('❌ La contraseña debe tener al menos 4 caracteres');
+                    return;
+                }
+                if (newPassword !== confirmPassword) {
+                    alert('❌ Las contraseñas no coinciden');
+                    return;
+                }
+            }
+
+            // Validar nuevo usuario si se especificó
+            if (newUsername && newUsername.length < 3) {
+                alert('❌ El usuario debe tener al menos 3 caracteres');
+                return;
+            }
+
+            // Actualizar credenciales
+            var userIndex = users.findIndex(function(u) { return u.user === currentUser; });
+            if (userIndex !== -1) {
+                var oldUsername = users[userIndex].user;
+                
+                // Actualizar usuario y/o contraseña
+                if (newUsername) {
+                    users[userIndex].user = newUsername;
+                    currentUser = newUsername; // Actualizar sesión actual
+                }
+                if (newPassword) {
+                    users[userIndex].pass = newPassword;
+                }
+
+                // Guardar cambios
+                saveData();
+                
+                // Actualizar interfaz
+                document.getElementById('userDisplay').textContent = '👤 ' + currentUser;
+                updateSettingsView();
+                
+                var message = '✅ Credenciales actualizadas correctamente\n\n';
+                if (newUsername && newPassword) {
+                    message += '👤 Nuevo usuario: ' + newUsername + '\n🔑 Nueva contraseña configurada';
+                } else if (newUsername) {
+                    message += '👤 Nuevo usuario: ' + newUsername;
+                } else if (newPassword) {
+                    message += '🔑 Nueva contraseña configurada';
+                }
+                message += '\n\n⚠️ No olvides anotar tus nuevas credenciales';
+                
+                alert(message);
+            } else {
+                alert('❌ Error al actualizar credenciales');
+            }
+        }
+
+        // Vista previa de foto
+        function previewPhoto(previewId, input) {
+            var preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+                preview.src = '';
             }
         }
 
@@ -851,21 +1057,26 @@
             var contact = document.getElementById('sContact').value;
             var parentContact = document.getElementById('sParentContact').value;
             var schedule = document.getElementById('sSchedule').value;
+            var photoInput = document.getElementById('sPhoto');
+            var photoPreview = document.getElementById('sPhotoPreview');
 
             if (!name) {
                 alert('El nombre del estudiante es obligatorio');
                 return;
             }
 
-            students.push({
+            var studentData = {
                 id: Date.now(),
                 name: name,
                 age: age || '',
                 parentName: parentName || '',
                 contact: contact || '',
                 parentContact: parentContact || '',
-                schedule: schedule || ''
-            });
+                schedule: schedule || '',
+                photo: photoPreview.src || ''
+            };
+
+            students.push(studentData);
 
             saveData();
             document.getElementById('sName').value = '';
@@ -874,6 +1085,9 @@
             document.getElementById('sContact').value = '';
             document.getElementById('sParentContact').value = '';
             document.getElementById('sSchedule').value = '';
+            document.getElementById('sPhoto').value = '';
+            photoPreview.style.display = 'none';
+            photoPreview.src = '';
             renderStudents();
             alert('✅ Estudiante agregado correctamente');
         }
@@ -906,6 +1120,22 @@
             filteredStudents.forEach(function(s) {
                 var div = document.createElement('div');
                 div.className = 'item';
+                div.style.display = 'flex';
+                div.style.gap = '15px';
+                div.style.alignItems = 'flex-start';
+                
+                // Mostrar foto si existe
+                if (s.photo) {
+                    var photoImg = document.createElement('img');
+                    photoImg.src = s.photo;
+                    photoImg.className = 'student-photo';
+                    photoImg.alt = s.name;
+                    div.appendChild(photoImg);
+                }
+                
+                // Contenedor de información
+                var infoWrapper = document.createElement('div');
+                infoWrapper.style.flex = '1';
                 
                 // Calcular estado de pagos
                 var studentPayments = payments.filter(function(p) { return p.studentId === s.id; });
@@ -979,8 +1209,9 @@
                 buttonsContainer.appendChild(editBtn);
                 buttonsContainer.appendChild(deleteBtn);
                 
-                div.appendChild(info);
-                div.appendChild(buttonsContainer);
+                infoWrapper.appendChild(info);
+                infoWrapper.appendChild(buttonsContainer);
+                div.appendChild(infoWrapper);
                 list.appendChild(div);
             });
             updateStudentSelect();
@@ -1021,6 +1252,16 @@
             document.getElementById('editParentContact').value = student.parentContact || '';
             document.getElementById('editSchedule').value = student.schedule || '';
             
+            // Cargar foto si existe
+            var photoPreview = document.getElementById('editPhotoPreview');
+            if (student.photo) {
+                photoPreview.src = student.photo;
+                photoPreview.style.display = 'block';
+            } else {
+                photoPreview.src = '';
+                photoPreview.style.display = 'none';
+            }
+            
             // Mostrar modal
             document.getElementById('editModal').classList.add('show');
         }
@@ -1039,6 +1280,7 @@
             var contact = document.getElementById('editContact').value;
             var parentContact = document.getElementById('editParentContact').value;
             var schedule = document.getElementById('editSchedule').value;
+            var photoPreview = document.getElementById('editPhotoPreview');
 
             if (!name) {
                 alert('El nombre del estudiante es obligatorio');
@@ -1059,7 +1301,8 @@
                 parentName: parentName,
                 contact: contact,
                 parentContact: parentContact,
-                schedule: schedule
+                schedule: schedule,
+                photo: photoPreview.src || students[studentIndex].photo || ''
             };
 
             saveData();
@@ -2842,6 +3085,12 @@
         <div class="modal-content">
             <h2 style="text-align: center; margin-bottom: 20px;">✏️ Editar Estudiante</h2>
             <input type="hidden" id="editStudentId">
+            <div class="photo-upload-container">
+                <label class="photo-upload-label" for="editPhoto">📷 Cambiar Foto</label>
+                <input type="file" id="editPhoto" accept="image/*" onchange="previewPhoto('editPhotoPreview', this)">
+                <img id="editPhotoPreview" class="student-photo-preview">
+                <div style="margin-top: 10px; color: #718096; font-size: 13px;">Opcional - Tamaño recomendado: 300x300px</div>
+            </div>
             <input type="text" id="editName" placeholder="Nombre completo del estudiante">
             <input type="date" id="editAge" placeholder="Fecha de nacimiento">
             <input type="text" id="editParentName" placeholder="Nombre del padre/madre/tutor">
