@@ -864,8 +864,9 @@
 
         // Login
         function login() {
-            var u = document.getElementById('user').value;
-            var p = document.getElementById('pass').value;
+            // Limpiar espacios extra al inicio y final
+            var u = document.getElementById('user').value.trim();
+            var p = document.getElementById('pass').value.trim();
             
             var found = users.find(function(user) {
                 return user.user === u && user.pass === p;
@@ -916,10 +917,17 @@
                     showView('students');
                 }
             } else {
-                // Mostrar información de diagnóstico
+                // Mostrar información de diagnóstico detallada
                 var usersList = users.map(function(u) { return u.user; }).join(', ');
+                var adminUser = users.find(function(u) { return u.user === 'admin'; });
+                var expectedPass = adminUser ? adminUser.pass : 'no encontrada';
+                
                 alert('❌ Usuario o contraseña incorrectos\n\n' + 
-                      '📋 Usuarios registrados: ' + usersList + '\n\n' +
+                      '📋 Usuarios registrados: ' + usersList + '\n' +
+                      '🔑 Contraseña esperada para admin: "' + expectedPass + '"\n' +
+                      '👤 Usuario ingresado: "' + u + '"\n' +
+                      '🔐 Contraseña ingresada: "' + p + '"\n' +
+                      '📏 Longitud contraseña: ' + p.length + ' caracteres\n\n' +
                       '💡 Si no puedes entrar:\n' +
                       '1. Usa el botón rojo "Restablecer Datos"\n' +
                       '2. O abre: ?reset=true al final de la URL');
