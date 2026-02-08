@@ -1152,6 +1152,11 @@
                 return s.name.toLowerCase().includes(searchTerm);
             });
 
+            // Ordenar alfabéticamente
+            filteredStudents.sort(function(a, b) {
+                return a.name.localeCompare(b.name);
+            });
+
             if (filteredStudents.length === 0) {
                 list.innerHTML = '<div class="empty-state">No se encontraron estudiantes con "' + searchTerm + '"</div>';
                 return;
@@ -1356,7 +1361,12 @@
             var select = document.getElementById('pStudent');
             select.innerHTML = '<option value="">Seleccionar estudiante</option>';
             
-            students.forEach(function(s) {
+            // Ordenar estudiantes alfabéticamente
+            var sortedStudents = students.slice().sort(function(a, b) {
+                return a.name.localeCompare(b.name);
+            });
+            
+            sortedStudents.forEach(function(s) {
                 var option = document.createElement('option');
                 option.value = s.id;
                 option.textContent = s.name;
@@ -1567,6 +1577,11 @@
                 else if (status === 'atrasado') atrasados.push(studentData);
                 else sinPagos.push(studentData);
             });
+            
+            // Ordenar todos los arrays alfabéticamente
+            alDia.sort(function(a, b) { return a.name.localeCompare(b.name); });
+            atrasados.sort(function(a, b) { return a.name.localeCompare(b.name); });
+            sinPagos.sort(function(a, b) { return a.name.localeCompare(b.name); });
             
             // Reporte de estudiantes al día
             report += '<div style="background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);padding:20px;border-radius:12px;margin:15px 0;border-left:5px solid #10b981;">';
@@ -2473,7 +2488,12 @@
             if (students.length === 0) {
                 report += '<p>No hay estudiantes registrados</p>';
             } else {
-                students.forEach(function(s) {
+                // Ordenar estudiantes alfabéticamente
+                var sortedStudents = students.slice().sort(function(a, b) {
+                    return a.name.localeCompare(b.name);
+                });
+                
+                sortedStudents.forEach(function(s) {
                     var studentAttendance = attendance.filter(function(a) { return a.studentId === s.id; });
                     var presentDays = studentAttendance.filter(function(a) { return a.present; }).length;
                     var absentDays = studentAttendance.filter(function(a) { return !a.present; }).length;
