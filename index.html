@@ -2311,50 +2311,71 @@
 
         // Renderizar lista de asistencia
         function renderAttendance() {
-            var today = new Date().toLocaleDateString('es-DO');
-            document.getElementById('todayDate').textContent = today;
-            
-            var list1 = document.getElementById('attendanceList1');
-            var list2 = document.getElementById('attendanceList2');
-            list1.innerHTML = '';
-            list2.innerHTML = '';
-            
-            if (students.length === 0) {
-                list1.innerHTML = '<div class="empty-state">No hay estudiantes registrados</div>';
-                return;
-            }
-            
-            var todayStr = new Date().toISOString().split('T')[0];
-            
-            // Separar estudiantes por horario
-            var students1 = students.filter(function(s) { 
-                return s.schedule === 'Sábado 2:00 PM - 4:00 PM'; 
-            });
-            var students2 = students.filter(function(s) { 
-                return s.schedule === 'Sábado 4:00 PM - 6:00 PM'; 
-            });
-            
-            // Renderizar estudiantes del horario 2-4pm
-            if (students1.length === 0) {
-                list1.innerHTML = '<div class="empty-state">No hay estudiantes en este horario</div>';
-            } else {
-                students1.forEach(function(s) {
-                    renderAttendanceItem(s, todayStr, list1);
+            try {
+                var today = new Date().toLocaleDateString('es-DO');
+                document.getElementById('todayDate').textContent = today;
+                
+                var list1 = document.getElementById('attendanceList1');
+                var list2 = document.getElementById('attendanceList2');
+                
+                if (!list1 || !list2) {
+                    console.error('No se encontraron los elementos de lista de asistencia');
+                    return;
+                }
+                
+                list1.innerHTML = '';
+                list2.innerHTML = '';
+                
+                if (students.length === 0) {
+                    list1.innerHTML = '<div class="empty-state">No hay estudiantes registrados</div>';
+                    return;
+                }
+                
+                var todayStr = new Date().toISOString().split('T')[0];
+                
+                // Separar estudiantes por horario y ordenar alfabéticamente
+                var students1 = students.filter(function(s) { 
+                    return s && s.schedule === 'Sábado 2:00 PM - 4:00 PM'; 
+                }).sort(function(a, b) {
+                    return (a.name || '').localeCompare(b.name || '');
                 });
-            }
-            
-            // Renderizar estudiantes del horario 4-6pm
-            if (students2.length === 0) {
-                list2.innerHTML = '<div class="empty-state">No hay estudiantes en este horario</div>';
-            } else {
-                students2.forEach(function(s) {
-                    renderAttendanceItem(s, todayStr, list2);
+                
+                var students2 = students.filter(function(s) { 
+                    return s && s.schedule === 'Sábado 4:00 PM - 6:00 PM'; 
+                }).sort(function(a, b) {
+                    return (a.name || '').localeCompare(b.name || '');
                 });
+                
+                // Renderizar estudiantes del horario 2-4pm
+                if (students1.length === 0) {
+                    list1.innerHTML = '<div class="empty-state">No hay estudiantes en este horario</div>';
+                } else {
+                    students1.forEach(function(s) {
+                        renderAttendanceItem(s, todayStr, list1);
+                    });
+                }
+                
+                // Renderizar estudiantes del horario 4-6pm
+                if (students2.length === 0) {
+                    list2.innerHTML = '<div class="empty-state">No hay estudiantes en este horario</div>';
+                } else {
+                    students2.forEach(function(s) {
+                        renderAttendanceItem(s, todayStr, list2);
+                    });
+                }
+            } catch (error) {
+                console.error('Error en renderAttendance:', error);
+                alert('❌ Error al cargar lista de asistencia. Por favor recarga la página.');
             }
         }
         
         // Función auxiliar para renderizar un item de asistencia
         function renderAttendanceItem(s, todayStr, list) {
+            if (!s || !s.id || !s.name) {
+                console.warn('Estudiante inválido:', s);
+                return;
+            }
+            
             var todayAttendance = attendance.find(function(a) {
                 return a.studentId === s.id && a.date === todayStr;
             });
