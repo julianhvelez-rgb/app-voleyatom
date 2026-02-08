@@ -1,9 +1,9 @@
 {
-  "id": "/volleyatom/",
+  "id": "/app-voleyatom/",
   "name": "VolleyAtom - Gestión de Voleibol",
   "short_name": "VolleyAtom",
   "description": "Sistema de gestión para academia de voleibol con control de estudiantes, pagos y asistencias",
-  "start_url": "./volleyatom-nuevo.html?source=pwa",
+  "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen"],

@@ -1,9 +1,9 @@
 // Service Worker para VolleyAtom
-const CACHE_NAME = 'volleyatom-v17';
+const CACHE_NAME = 'volleyatom-v18';
 const urlsToCache = [
   './',
-  './volleyatom-nuevo.html',
   './index.html',
+  './volleyatom-nuevo.html',
   './manifest.json'
 ];
 
@@ -55,7 +55,7 @@ self.addEventListener('fetch', event => {
           return response;
         }).catch(() => {
           // Si falla la red, devolver una respuesta offline básica
-          return caches.match('./volleyatom-nuevo.html') || caches.match('./index.html');
+          return caches.match('./index.html') || caches.match('./volleyatom-nuevo.html');
         });
       })
   );
