@@ -1,10 +1,12 @@
 // Service Worker para VolleyAtom
-const CACHE_NAME = 'volleyatom-v18';
+const CACHE_NAME = 'volleyatom-v19';
 const urlsToCache = [
   './',
   './index.html',
   './volleyatom-nuevo.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.svg',
+  './icon-512.svg'
 ];
 
 // Instalar Service Worker
